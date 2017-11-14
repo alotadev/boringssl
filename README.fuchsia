@@ -1,0 +1,18 @@
+Name: boringssl
+URL: https://boringssl.googlesource.com/boringssl
+Version: git
+License: BSDish
+License File: src/LICENSE
+Security Critical: yes
+
+Description:
+A fork of OpenSSL, as described at https://www.imperialviolet.org/2014/06/20/boringssl.html
+
+To update:
+1. Execute "go run roll_boringssl.go"
+2. Build and test Fuchsia as normal.
+3. Update //zircon/third_party/ulib/uboringssl as documented there.
+4. Commit and push normally.  Note the resulting revision for the next step.
+5. Create and upload a CL that updates //garnet/manifest/boringssl
+
+TODO(aarongreen): Document testing steps.
