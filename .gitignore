@@ -10,3 +10,5 @@ mac-x86/
 win-x86/
 win-x86_64/
 
+# Temporary file of unextracted certs
+certdata.txt

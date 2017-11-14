@@ -8,6 +8,10 @@ Security Critical: yes
 Description:
 A fork of OpenSSL, as described at https://www.imperialviolet.org/2014/06/20/boringssl.html
 
+Additionally, this includes the convert_mozilla_certdata.go tool.  This tool extracts a bundle of
+Mozilla root certificates, and is available at https://github.com/agl/extract-nss-root-certs.
+The version of the tool here matches commit 492d8c95628eb861a9f1467099936bc2b1fd6a7b.
+
 To update:
 1. Execute "go run roll_boringssl.go"
 2. Build and test Fuchsia as normal.

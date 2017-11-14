@@ -70,7 +70,7 @@ if (is_fuchsia) {
           name = "libssl.so"
         } ]
     resources = [ {
-          path = rebase_path("//third_party/root_certificates/certdata.pem")
+          path = rebase_path("certdata.pem")
           dest = "boringssl/cert.pem"
         } ]
   }
