@@ -33,25 +33,39 @@ if (is_fuchsia) {
 
 shared_library("crypto") {
   sources = crypto_sources
+  public_configs = [ ":boringssl_config" ]
+  configs += [ ":internal_config" ]
   if (current_cpu == "arm64") {
     if (is_mac) {
       sources += crypto_sources_ios_aarch64
-    } else if (is_fuchsia || is_linux) {
+      configs += [ ":pthread_config" ]
+    } else if (is_fuchsia) {
+      # TODO(aarongreen): Switch once aarch64 once crypto/cpu-aarch64-fuchsia.c
+      # is upstreamed.
+      # sources += crypto_sources_linux_aarch64
+      configs += [ ":no_asm_config" ]
+    } else if (is_linux) {
       sources += crypto_sources_linux_aarch64
+      configs += [ ":pthread_config" ]
     } else {
       assert(false, "unsupported OS: {{current_os}}")
     }
   } else if (current_cpu == "x64") {
     if (is_mac) {
       sources += crypto_sources_mac_x86_64
-    } else if (is_fuchsia || is_linux) {
+      configs += [ ":pthread_config" ]
+    } else if (is_fuchsia) {
+      # Fuchsia assembly is the same as Linux on x86-64, for now; i.e. ELF.
       sources += crypto_sources_linux_x86_64
+    } else if (is_linux) {
+      sources += crypto_sources_linux_x86_64
+      configs += [ ":pthread_config" ]
     } else {
       assert(false, "unsupported OS: {{current_os}}")
     }
+  } else {
+    assert(false, "unsupported CPU: {{current_cpu}}")
   }
-  public_configs = [ ":boringssl_config" ]
-  configs += [ ":internal_config" ]
 }
 
 #############
@@ -206,36 +220,20 @@ config("internal_config") {
     "BORINGSSL_SHARED_LIBRARY",
     "OPENSSL_SMALL",
   ]
-  if (is_linux || is_mac) {
-    # pthread_rwlock_t on host requires a feature flag.
-    defines += [ "_XOPEN_SOURCE=700" ]
-  }
-
-  # TODO(aarongreen): Before we can enable the optimized assembly on ARM, we
-  # need to have GN arguments or similar to indicate whether we have crypto
-  # support.  When we don't, we should fall back to using OPENSSL_NO_ASM.  We
-  # should be able to run on platforms without crypto support even when building
-  # with it, since BoringSSL does the runtime check of 'OPENSSL_cpuid_setup',
-  # but to do this we'll need to provide an equivalent implementation, e.g.
-  # "crypto/cpu-aarch64-fuchsia.c".
-  if (current_cpu == "arm64") {
-    if (is_fuchsia) {
-      defines += [ "OPENSSL_NO_ASM" ]
-    } else if (!is_linux && !is_mac) {
-      assert(false, "unsupported OS: {{current_os}}")
-    }
-  } else if (current_cpu == "x64") {
-    if (!is_fuchsia && !is_linux && !is_mac) {
-      assert(false, "unsupported OS: {{current_os}}")
-    }
-  } else {
-    assert(false, "unsupported architecture: {{current_cpu}}")
-  }
   cflags = [ "-Wno-unused-function" ]
   configs = [
     ":boringssl_config",
     "//build/config:shared_library_config",
   ]
+}
+
+config("pthread_config") {
+  # pthread_rwlock_t on host requires a feature flag.
+  defines = [ "_XOPEN_SOURCE=700" ]
+}
+
+config("no_asm_config") {
+  defines = [ "OPENSSL_NO_ASM" ]
 }
 
 config("test_config") {
