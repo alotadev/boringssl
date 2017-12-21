@@ -172,6 +172,7 @@ if (is_fuchsia) {
   }
 } else {
   group("tests") {
+    testonly = true
     deps = [
       ":crypto_test",
       ":ssl_test",
