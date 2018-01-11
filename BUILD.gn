@@ -31,7 +31,13 @@ if (is_fuchsia) {
   }
 }
 
-shared_library("crypto") {
+if (is_fuchsia) {
+  library_type = "shared_library"
+} else {
+  library_type = "static_library"
+}
+
+target(library_type, "crypto") {
   sources = crypto_sources
   public_configs = [ ":boringssl_config" ]
   configs += [ ":internal_config" ]
