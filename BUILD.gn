@@ -93,7 +93,7 @@ if (is_fuchsia) {
   }
 }
 
-shared_library("ssl") {
+target(library_type,"ssl") {
   sources = ssl_sources
   public_configs = [ ":boringssl_config" ]
   configs += [ ":internal_config" ]
