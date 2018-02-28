@@ -174,7 +174,7 @@ executable("crypto_test") {
   configs += [ ":test_config" ]
   deps = [
     ":crypto",
-    "//third_party/gtest",
+    "//third_party/googletest:gtest",
   ]
 }
 
@@ -186,7 +186,7 @@ executable("ssl_test") {
   deps = [
     ":crypto",
     ":ssl",
-    "//third_party/gtest",
+    "//third_party/googletest:gtest",
   ]
 }
 
@@ -230,7 +230,6 @@ config("test_config") {
   include_dirs = [
     "src/crypto/test",
     "src/ssl/test",
-    "//third_party/gtest/include",
   ]
   configs = [ ":internal_config" ]
 }
