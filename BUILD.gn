@@ -21,6 +21,7 @@ group("boringssl") {
 ################
 target(default_library_type, "crypto") {
   sources = crypto_sources
+  public = crypto_headers
   public_configs = [ ":boringssl_config" ]
   configs += [ ":internal_config" ]
   if (current_cpu == "arm64") {
@@ -70,15 +71,18 @@ if (is_fuchsia) {
     deps = [
       ":ssl",
     ]
-    resources = [ {
-          path = rebase_path("certdata.pem")
-          dest = "boringssl/cert.pem"
-        } ]
+    resources = [
+      {
+        path = rebase_path("certdata.pem")
+        dest = "boringssl/cert.pem"
+      },
+    ]
   }
 }
 
 target(default_library_type, "ssl") {
   sources = ssl_sources
+  public = ssl_headers
   public_configs = [ ":boringssl_config" ]
   configs += [ ":internal_config" ]
   deps = [
@@ -95,9 +99,11 @@ if (is_fuchsia) {
     deps = [
       ":bssl",
     ]
-    binaries = [ {
-          name = "bssl"
-        } ]
+    binaries = [
+      {
+        name = "bssl"
+      },
+    ]
   }
 } else {
   group("boringssl_tool") {
