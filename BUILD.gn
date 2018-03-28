@@ -19,25 +19,7 @@ group("boringssl") {
 ################
 # libcrypto.so #
 ################
-if (is_fuchsia) {
-  package("libcrypto") {
-    system_image = true
-    deps = [
-      ":crypto",
-    ]
-    libraries = [ {
-          name = "libcrypto.so"
-        } ]
-  }
-}
-
-if (is_fuchsia) {
-  library_type = "shared_library"
-} else {
-  library_type = "static_library"
-}
-
-target(library_type, "crypto") {
+target(default_library_type, "crypto") {
   sources = crypto_sources
   public_configs = [ ":boringssl_config" ]
   configs += [ ":internal_config" ]
@@ -78,14 +60,16 @@ target(library_type, "crypto") {
 # libssl.so #
 #############
 if (is_fuchsia) {
+  # TODO(mcgrathr): This package shouldn't really exist because library
+  # dependencies are automatically included into packages as necessary.
+  # But we don't yet have a good way for that to include resources that
+  # are needed by the library.
+  # TODO(aarongreen): Rename this to "root_certs" or suchlike.
   package("libssl") {
     system_image = true
     deps = [
       ":ssl",
     ]
-    libraries = [ {
-          name = "libssl.so"
-        } ]
     resources = [ {
           path = rebase_path("certdata.pem")
           dest = "boringssl/cert.pem"
@@ -93,7 +77,7 @@ if (is_fuchsia) {
   }
 }
 
-target(library_type,"ssl") {
+target(default_library_type, "ssl") {
   sources = ssl_sources
   public_configs = [ ":boringssl_config" ]
   configs += [ ":internal_config" ]
