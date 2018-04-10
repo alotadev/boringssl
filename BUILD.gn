@@ -66,7 +66,7 @@ if (is_fuchsia) {
   # are needed by the library.
   # TODO(aarongreen): Rename this to "root_certs" or suchlike.
   package("libssl") {
-    system_image = true
+    deprecated_system_image = true
     deps = [
       ":ssl",
     ]
@@ -91,7 +91,7 @@ target(default_library_type, "ssl") {
 ##########################
 if (is_fuchsia) {
   package("boringssl_tool") {
-    system_image = true
+    deprecated_system_image = true
     deps = [
       ":bssl",
     ]
@@ -140,7 +140,7 @@ executable("bssl") {
 if (is_fuchsia) {
   package("boringssl_tests") {
     testonly = true
-    system_image = true
+    deprecated_system_image = true
     deps = [
       ":crypto_test",
       ":ssl_test",
