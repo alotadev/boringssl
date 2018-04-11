@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/cpp/prebuilt_shared_library.gni")
 import("//build/package.gni")
 import("BUILD.generated.gni")
 import("BUILD.generated_tests.gni")
@@ -16,10 +17,16 @@ group("boringssl") {
   ]
 }
 
+if (is_fuchsia) {
+  library_type = "prebuilt_shared_library"
+} else {
+  library_type = default_library_type
+}
+
 ################
 # libcrypto.so #
 ################
-target(default_library_type, "crypto") {
+target(library_type, "crypto") {
   sources = crypto_sources
   public = crypto_headers
   public_configs = [ ":boringssl_config" ]
@@ -55,6 +62,9 @@ target(default_library_type, "crypto") {
   } else {
     assert(false, "unsupported CPU: {{current_cpu}}")
   }
+  if (is_fuchsia) {
+    include_base = "//third_party/boringssl/src/include"
+  }
 }
 
 #############
@@ -80,7 +90,7 @@ if (is_fuchsia) {
   }
 }
 
-target(default_library_type, "ssl") {
+target(library_type, "ssl") {
   sources = ssl_sources
   public = ssl_headers
   public_configs = [ ":boringssl_config" ]
@@ -88,6 +98,10 @@ target(default_library_type, "ssl") {
   deps = [
     ":crypto",
   ]
+  if (is_fuchsia) {
+    runtime_deps = [ ":crypto_sdk" ]
+    include_base = "//third_party/boringssl/src/include"
+  }
 }
 
 ##########################
