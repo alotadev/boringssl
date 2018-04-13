@@ -48,10 +48,11 @@ var (
 	submit = flag.Bool("submit", false, "Submits new topic to gerrit; ignores all other flags")
 )
 
-// These files are either auto-generated or explicitly added.
+// These uboringssl files don't needed to be rolled from BoringSSL.
 var skipped_files = map[string]bool{
-	"/crypto/cpu-aarch64-zircon.cpp": true,
-	"/crypto/err/err_data.c":         true,
+	"/README.fuchsia.md": true,
+	"/rules.mk":          true,
+	"/stack-note.S":     true,
 }
 
 // These files have manual edits.  The hex string is the SHA256 digest of the original file; it will
@@ -128,7 +129,7 @@ func sha256sum(path string) string {
 }
 
 // Adds all changes in the |repo| and commits them labeled by the triggering |revision|.
-func commitChanges(repoPath, label string) {
+func commitChanges(repoPath string) {
 	infof("  Committing changes...")
 	rev := getGitRevision(filepath.Join(*boring, "src"))
 	out := run(repoPath, "git", "status", "--short")
@@ -136,7 +137,7 @@ func commitChanges(repoPath, label string) {
 		return
 	}
 	run(repoPath, "git", "add", ".")
-	run(repoPath, "git", "commit", "-m", "["+label+"] Roll BoringSSL to "+string(rev[:10]))
+	run(repoPath, "git", "commit", "-m", "[boringssl] Roll to "+string(rev[:10]))
 }
 
 // Pushes a commit to a review with the given topic.
@@ -160,7 +161,6 @@ func updateFuchsia() {
 
 func updateBoring() {
 	src := filepath.Join(*boring, "src")
-	defer commitChanges(*boring, "src")
 
 	infof("Updating sources...")
 	run(src, "git", "fetch")
@@ -171,15 +171,10 @@ func updateBoring() {
 
 	infof("Updating Jiri manifest...")
 	updateManifest("project", src, filepath.Join(*boring, "manifest"))
-
-	if *skipBundle {
-		commitChanges(*boring, "boringssl")
-	}
 }
 
 func updateBundle() {
 	infof("  Fetching root certificates...")
-	defer commitChanges(*boring, "certdata")
 
 	var response *http.Response
 	var err error
@@ -237,7 +232,6 @@ func updateBundle() {
 // copy any files present in uboringssl that do not match their counterpart in BoringSSL
 func updateZircon() {
 	infof("  Updating README file...")
-	defer commitChanges(*zircon, "uboringssl")
 
 	rev := getGitRevision(filepath.Join(*boring, "src"))
 	readmePath := filepath.Join(*zircon, "README.fuchsia.md")
@@ -272,13 +266,18 @@ func updateZircon() {
 			return nil
 		}
 		stem := zirconPath[len(*zircon):]
-		boringPath := filepath.Join(*boring, "src", stem)
 		if skipped_files[stem] {
 			return nil
+		}
+		// Look for the matching file under boringssl or boringssl/src
+		boringPath := filepath.Join(*boring, stem)
+		if _, err = os.Stat(boringPath); os.IsNotExist(err) {
+			boringPath = filepath.Join(*boring, "src", stem)
 		}
 		if _, err = os.Stat(boringPath); os.IsNotExist(err) {
 			manual_files[stem] = true
 		}
+		// Check for files needing manual changes based on original file's digest
 		boringHash := sha256sum(boringPath)
 		zirconHash, found := edited_files[stem]
 		if found {
@@ -287,27 +286,19 @@ func updateZircon() {
 			}
 			return nil
 		}
+		// Copy files that have changed
 		if boringHash != sha256sum(zirconPath) {
 			run(*fuchsia, "cp", boringPath, zirconPath)
 		}
 		return nil
 	}
-	// Whitelist the uboringssl directories to search
-	stems := []string{"crypto", "decrepit", "include"}
-	for _, stem := range stems {
-		path := filepath.Join(*zircon, stem)
-		if err := filepath.Walk(path, walker); err != nil {
-			log.Fatal(err)
-		}
+	if err := filepath.Walk(*zircon, walker); err != nil {
+		log.Fatal(err)
 	}
-
-	run(*zircon, "sh", "-c", filepath.Join("scripts", "perlasm.sh"))
 }
 
 func updateGarnet() {
 	infof("  Updating Jiri manifest...")
-	defer commitChanges(*garnet, "manifest")
-
 	updateManifest("import", *boring, filepath.Join(*garnet, "third_party"))
 }
 
@@ -392,7 +383,11 @@ func main() {
 
 	if !*skipGarnet {
 		infof("Committing changes and updating Garnet...")
+		for commit := range commits {
+			commitChanges(commit)
+		}
 		updateGarnet()
+		commitChanges(*garnet)
 		commits["garnet"] = true
 		infof("Done!")
 	}
