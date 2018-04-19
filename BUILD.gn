@@ -193,6 +193,7 @@ executable("ssl_test") {
   sources = ssl_test_sources + test_support_sources
   configs += [ ":test_config" ]
   deps = [
+    ":crypto",
     ":ssl",
     "//third_party/gtest",
   ]
