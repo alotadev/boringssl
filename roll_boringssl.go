@@ -17,9 +17,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -27,12 +25,8 @@ import (
 	"time"
 )
 
-const bundleURL = "https://hg.mozilla.org/mozilla-central/raw-file/tip/security/nss/lib/ckfw/builtins/certdata.txt"
-const bundleRetries = 3
-
 var (
 	boring  = flag.String("boring", "third_party/boringssl", "Path to repository")
-	bundle  = flag.String("bundle", bundleURL, "URL to retrieve certificates from")
 	commit  = flag.String("commit", "origin/upstream/master", "Upstream commit-ish to check out")
 	fuchsia = flag.String("fuchsia", os.Getenv("FUCHSIA_DIR"), "Fuchsia root directory")
 	garnet  = flag.String("garnet", "garnet/manifest", "Path to Garnet manifest directoy")
@@ -40,7 +34,6 @@ var (
 
 	skipFuchsia = flag.Bool("skip-fuchsia", false, "Don't run 'jiri update' first")
 	skipBoring  = flag.Bool("skip-boring", false, "Don't update upstream sources or build files")
-	skipBundle  = flag.Bool("skip-bundle", false, "Don't update the root certificate bundle")
 	skipZircon  = flag.Bool("skip-zircon", false, "Don't update Zircon's uboringssl library")
 	skipGarnet  = flag.Bool("skip-garnet", false, "Don't update Garnet's third_party manifest")
 
@@ -52,7 +45,7 @@ var (
 var skipped_files = map[string]bool{
 	"/README.fuchsia.md": true,
 	"/rules.mk":          true,
-	"/stack-note.S":     true,
+	"/stack-note.S":      true,
 }
 
 // These files have manual edits.  The hex string is the SHA256 digest of the original file; it will
@@ -171,61 +164,6 @@ func updateBoring() {
 
 	infof("Updating Jiri manifest...")
 	updateManifest("project", src, filepath.Join(*boring, "manifest"))
-}
-
-func updateBundle() {
-	infof("  Fetching root certificates...")
-
-	var response *http.Response
-	var err error
-	for i := 0; i < bundleRetries; i += 1 {
-		if response, err = http.Get(*bundle); err == nil {
-			break
-		}
-		log.Println(err)
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer response.Body.Close()
-	certdata, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	textfile := filepath.Join(*boring, "certdata.txt")
-	olddigest := sha256sum(textfile)
-	rawdigest := sha256.Sum256(certdata)
-	hexdigest := hex.EncodeToString(rawdigest[:])
-	if olddigest == hexdigest {
-		infof("  Root certificates unchanged.")
-		return
-	}
-
-	stamp := "URL:    " + *bundle + "\n"
-	stamp += "SHA256: " + hexdigest + "\n"
-	stamp += "Time:   " + time.Now().String() + "\n"
-
-	stampfile, err := os.Create(filepath.Join(*boring, "certdata.stamp"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stampfile.Close()
-
-	if _, err = stampfile.WriteString(stamp); err != nil {
-		log.Fatal(err)
-	}
-
-	if err := ioutil.WriteFile("certdata.txt", certdata, 0644); err != nil {
-		log.Fatal(err)
-	}
-
-	infof("  Converting to PEM...")
-	out := run(*boring, "go", "run", "convert_mozilla_certdata.go")
-	if err := ioutil.WriteFile("certdata.pem", out, 0644); err != nil {
-		log.Fatal(err)
-	}
-
 }
 
 // To update Zircon's uboringssl library, we update the revision number in the README file and
@@ -370,15 +308,6 @@ func main() {
 		}
 		log.Fatal("Please resolve these files and try again.")
 		return
-	}
-
-	if !*skipBundle {
-		infof("Updating root certificates...")
-		updateBundle()
-		packages["topaz/packages/default"] = true
-		tests["Login workflow"] = true
-		commits["third_party/boringssl"] = true
-		infof("Done!")
 	}
 
 	if !*skipGarnet {
