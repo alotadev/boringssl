@@ -27,6 +27,9 @@ if (is_fuchsia) {
 # libcrypto.so #
 ################
 target(library_type, "crypto") {
+  if (is_fuchsia) {
+    category = "partner"
+  }
   sources = crypto_sources
   public = crypto_headers
   public_configs = [ ":boringssl_config" ]
@@ -68,6 +71,9 @@ target(library_type, "crypto") {
 }
 
 target(library_type, "ssl") {
+  if (is_fuchsia) {
+    category = "partner"
+  }
   sources = ssl_sources
   public = ssl_headers
   public_configs = [ ":boringssl_config" ]
