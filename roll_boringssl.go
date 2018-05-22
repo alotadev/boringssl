@@ -51,7 +51,7 @@ var skipped_files = map[string]bool{
 // These files have manual edits.  The hex string is the SHA256 digest of the original file; it will
 // be flagged as having changed if the digest doesn't match.
 var edited_files = map[string]string{
-	"/include/openssl/base.h": "adf0c5e34c6f8a319a1c27012935c144cfbffa6b9c05b25ccc3c39d33ddedbcc",
+	"/include/openssl/base.h": "f7334f90a17f2dccded5d9d361784dbf8291a60ad4c04147a06b2f59e0e49d51",
 }
 
 // This variable will be populated with files needing manual intervention, either because they are
