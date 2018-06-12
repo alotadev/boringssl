@@ -7,6 +7,6 @@
     <project name="third_party/boringssl/src"
              path="third_party/boringssl/src"
              remote="https://fuchsia.googlesource.com/third_party/boringssl"
-             revision="189270cd190267f5bd60cfe8f8ce7a61d07ba6f4"/>
+             revision="6ff2ba80b758025fdb137d9357dcbba0a9c04dbf"/>
   </projects>
 </manifest>
