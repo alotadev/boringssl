@@ -143,7 +143,6 @@ executable("bssl") {
 if (is_fuchsia) {
   package("boringssl_tests") {
     testonly = true
-    deprecated_system_image = true
     deps = [
       ":crypto_test",
       ":ssl_test",
