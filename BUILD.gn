@@ -67,6 +67,7 @@ target(library_type, "crypto") {
   }
   if (is_fuchsia) {
     include_base = "//third_party/boringssl/src/include"
+    deps = [ "//zircon/public/lib/zxcpp" ]
   }
 }
 
@@ -84,6 +85,7 @@ target(library_type, "ssl") {
   if (is_fuchsia) {
     runtime_deps = [ ":crypto_sdk" ]
     include_base = "//third_party/boringssl/src/include"
+    deps += [ "//zircon/public/lib/zxcpp" ]
   }
 }
 
