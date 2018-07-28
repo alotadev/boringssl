@@ -34,6 +34,7 @@ var (
 
 	skipFuchsia = flag.Bool("skip-fuchsia", false, "Don't run 'jiri update' first")
 	skipBoring  = flag.Bool("skip-boring", false, "Don't update upstream sources or build files")
+	skipRust    = flag.Bool("skip-rust", false, "Don't update Rust bindings")
 	skipZircon  = flag.Bool("skip-zircon", false, "Don't update Zircon's uboringssl library")
 	skipGarnet  = flag.Bool("skip-garnet", false, "Don't update Garnet's third_party manifest")
 
@@ -166,6 +167,10 @@ func updateBoring() {
 	updateManifest("project", src, filepath.Join(*boring, "manifest"))
 }
 
+func updateRust() {
+	run("", filepath.Join(*boring, "rust/boringssl-sys/bindgen.sh"))
+}
+
 // To update Zircon's uboringssl library, we update the revision number in the README file and
 // copy any files present in uboringssl that do not match their counterpart in BoringSSL
 func updateZircon() {
@@ -290,6 +295,12 @@ func main() {
 		tests["/system/test/disabled/crypto_test"] = true
 		tests["/system/test/ssl_test"] = true
 		commits["third_party/boringssl"] = true
+		infof("Done!")
+	}
+
+	if !*skipRust {
+		infof("Updating Rust bindings...")
+		updateRust()
 		infof("Done!")
 	}
 
