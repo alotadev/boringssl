@@ -1830,6 +1830,7 @@ pub struct evp_pkey_method_st {
 }
 pub type EVP_PKEY_METHOD = evp_pkey_method_st;
 pub type EVP_PKEY = evp_pkey_st;
+pub type HMAC_CTX = hmac_ctx_st;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ossl_init_settings_st {
@@ -9952,6 +9953,122 @@ fn bindgen_test_layout_evp_pkey_st() {
             stringify!(evp_pkey_st),
             "::",
             stringify!(ameth)
+        )
+    );
+}
+extern "C" {
+    pub fn HMAC_CTX_init(ctx: *mut HMAC_CTX);
+}
+extern "C" {
+    pub fn HMAC_CTX_new() -> *mut HMAC_CTX;
+}
+extern "C" {
+    pub fn HMAC_CTX_cleanup(ctx: *mut HMAC_CTX);
+}
+extern "C" {
+    pub fn HMAC_CTX_free(ctx: *mut HMAC_CTX);
+}
+extern "C" {
+    pub fn HMAC_Init_ex(
+        ctx: *mut HMAC_CTX,
+        key: *const ::std::os::raw::c_void,
+        key_len: usize,
+        md: *const EVP_MD,
+        impl_: *mut ENGINE,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn HMAC_Update(
+        ctx: *mut HMAC_CTX,
+        data: *const u8,
+        data_len: usize,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn HMAC_Final(
+        ctx: *mut HMAC_CTX,
+        out: *mut u8,
+        out_len: *mut ::std::os::raw::c_uint,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn HMAC_size(ctx: *const HMAC_CTX) -> usize;
+}
+extern "C" {
+    pub fn HMAC_CTX_copy_ex(dest: *mut HMAC_CTX, src: *const HMAC_CTX) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn HMAC_CTX_reset(ctx: *mut HMAC_CTX);
+}
+extern "C" {
+    pub fn HMAC_Init(
+        ctx: *mut HMAC_CTX,
+        key: *const ::std::os::raw::c_void,
+        key_len: ::std::os::raw::c_int,
+        md: *const EVP_MD,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn HMAC_CTX_copy(dest: *mut HMAC_CTX, src: *const HMAC_CTX) -> ::std::os::raw::c_int;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct hmac_ctx_st {
+    pub md: *const EVP_MD,
+    pub md_ctx: EVP_MD_CTX,
+    pub i_ctx: EVP_MD_CTX,
+    pub o_ctx: EVP_MD_CTX,
+}
+#[test]
+fn bindgen_test_layout_hmac_ctx_st() {
+    assert_eq!(
+        ::std::mem::size_of::<hmac_ctx_st>(),
+        104usize,
+        concat!("Size of: ", stringify!(hmac_ctx_st))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<hmac_ctx_st>(),
+        8usize,
+        concat!("Alignment of ", stringify!(hmac_ctx_st))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<hmac_ctx_st>())).md as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(hmac_ctx_st),
+            "::",
+            stringify!(md)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<hmac_ctx_st>())).md_ctx as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(hmac_ctx_st),
+            "::",
+            stringify!(md_ctx)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<hmac_ctx_st>())).i_ctx as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(hmac_ctx_st),
+            "::",
+            stringify!(i_ctx)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<hmac_ctx_st>())).o_ctx as *const _ as usize },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(hmac_ctx_st),
+            "::",
+            stringify!(o_ctx)
         )
     );
 }
