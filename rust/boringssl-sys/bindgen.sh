@@ -27,7 +27,7 @@ done
 # Whitelist BoringSSL-related symbols so we don't get non-BoringSSL symbols such
 # as platform-specific symbols (specific to the platform that is running
 # 'bindgen') and other C standard library symbols.
-WHITELIST="(ERR|BIO|CRYPTO|RAND|V_ASN1|ASN1|B_ASN1|CBS_ASN1|CAST|EVP|CBS|CBB|CIPHER|OPENSSL|SSLEAY|DH|DES|DIGEST|DSA|NID|EC|ECDSA|ECDH|SHA|SHA1|SHA224|SHA256|SHA384|SHA512|HMAC)_.*"
+WHITELIST="(ERR|BIO|CRYPTO|RAND|V_ASN1|ASN1|B_ASN1|CBS_ASN1|CAST|EVP|CBS|CBB|CIPHER|OPENSSL|SSLEAY|DH|DES|DIGEST|DSA|NID|EC|ECDSA|ECDH|ED25519|X25519|SHA|SHA1|SHA224|SHA256|SHA384|SHA512|HMAC)_.*"
 # NOTE(joshlf) on --target: Currently, we just pass x86_64 since none of the
 # symbols we're linking against are architecture-specific (they may be
 # word-size-specific, but Fuchsia only targets 64-bit platforms). If this ever
