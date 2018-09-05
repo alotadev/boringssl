@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//build/cpp/sdk_shared_library.gni")
+import("//build/fuzzing/fuzzer.gni")
 import("//build/package.gni")
 import("BUILD.generated.gni")
 import("BUILD.generated_tests.gni")
@@ -43,6 +44,15 @@ target(library_type, "crypto") {
   sources = crypto_sources
   public = crypto_headers
   public_configs = [ ":boringssl_config" ]
+  is_fuzzer = false
+  foreach (config, configs) {
+    if (config == "//build/config/sanitizers:fuzzer") {
+      is_fuzzer = true
+    }
+  }
+  if (is_fuzzer) {
+    configs += [ ":fuzz_config" ]
+  }
   configs += [ ":internal_config" ]
   if (is_fuchsia) {
     include_base = "//third_party/boringssl/src/include"
@@ -179,6 +189,36 @@ executable("ssl_test") {
 }
 
 ################################################################################
+# Fuzzers
+
+# Explicitly remove the arm_cpuinfo fuzzer, which tests Linux-specific routines
+if (is_fuchsia) {
+  fuzzers -= [ "arm_cpuinfo" ]
+}
+
+foreach(fuzzer, fuzzers) {
+  fuzz_target("${fuzzer}_fuzzer") {
+    visibility = [ ":*" ]
+    sources = ["src/fuzz/${fuzzer}.cc"]
+    configs += [ ":fuzz_config", ]
+    deps = [
+      ":crypto",
+      ":ssl",
+    ]
+    corpora = [ get_path_info("src/fuzz/${fuzzer}_corpus", "abspath") ]
+  }
+}
+
+fuzz_package("boringssl_fuzzers") {
+  targets = []
+  foreach(fuzzer, fuzzers) {
+    targets += [":${fuzzer}_fuzzer"]
+  }
+  sanitizers = [ "asan", "ubsan" ]
+}
+
+
+################################################################################
 # Configs
 config("boringssl_config") {
   include_dirs = [ "src/include" ]
@@ -215,6 +255,16 @@ config("test_config") {
   include_dirs = [
     "src/crypto/test",
     "src/ssl/test",
+  ]
+  configs = [ ":internal_config" ]
+}
+
+config("fuzz_config") {
+  visibility = [ ":*" ]
+  # BoringSSL explicitly decided against using the common LLVM fuzzing macro:
+  # https://boringssl-review.googlesource.com/c/boringssl/+/31244
+  defines = [
+    "BORINGSSL_UNSAFE_DETERMINISTIC_MODE",
   ]
   configs = [ ":internal_config" ]
 }
