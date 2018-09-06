@@ -111,7 +111,7 @@ where
 pub const OPENSSL_VERSION_NUMBER: u32 = 269484159;
 pub const SSLEAY_VERSION_NUMBER: u32 = 269484159;
 pub const EVP_AEAD_MAX_KEY_LENGTH: u32 = 80;
-pub const EVP_AEAD_MAX_NONCE_LENGTH: u32 = 16;
+pub const EVP_AEAD_MAX_NONCE_LENGTH: u32 = 24;
 pub const EVP_AEAD_MAX_OVERHEAD: u32 = 64;
 pub const EVP_AEAD_DEFAULT_TAG_LENGTH: u32 = 0;
 pub const ERR_FLAG_STRING: u32 = 1;
@@ -147,10 +147,6 @@ pub const BIO_CTRL_DGRAM_GET_FALLBACK_MTU: u32 = 47;
 pub const BIO_CTRL_RESET: u32 = 1;
 pub const BIO_CTRL_EOF: u32 = 2;
 pub const BIO_CTRL_INFO: u32 = 3;
-pub const BIO_CTRL_SET: u32 = 4;
-pub const BIO_CTRL_GET: u32 = 5;
-pub const BIO_CTRL_PUSH: u32 = 6;
-pub const BIO_CTRL_POP: u32 = 7;
 pub const BIO_CTRL_GET_CLOSE: u32 = 8;
 pub const BIO_CTRL_SET_CLOSE: u32 = 9;
 pub const BIO_CTRL_PENDING: u32 = 10;
@@ -158,8 +154,12 @@ pub const BIO_CTRL_FLUSH: u32 = 11;
 pub const BIO_CTRL_WPENDING: u32 = 13;
 pub const BIO_CTRL_SET_CALLBACK: u32 = 14;
 pub const BIO_CTRL_GET_CALLBACK: u32 = 15;
-pub const BIO_CTRL_SET_FILENAME: u32 = 30;
+pub const BIO_CTRL_SET: u32 = 4;
+pub const BIO_CTRL_GET: u32 = 5;
+pub const BIO_CTRL_PUSH: u32 = 6;
+pub const BIO_CTRL_POP: u32 = 7;
 pub const BIO_CTRL_DUP: u32 = 12;
+pub const BIO_CTRL_SET_FILENAME: u32 = 30;
 pub const BIO_FLAGS_READ: u32 = 1;
 pub const BIO_FLAGS_WRITE: u32 = 2;
 pub const BIO_FLAGS_IO_SPECIAL: u32 = 4;
@@ -540,16 +540,20 @@ pub const EVP_CTRL_SET_RC5_ROUNDS: u32 = 5;
 pub const EVP_CTRL_RAND_KEY: u32 = 6;
 pub const EVP_CTRL_PBE_PRF_NID: u32 = 7;
 pub const EVP_CTRL_COPY: u32 = 8;
-pub const EVP_CTRL_GCM_SET_IVLEN: u32 = 9;
-pub const EVP_CTRL_GCM_GET_TAG: u32 = 16;
-pub const EVP_CTRL_GCM_SET_TAG: u32 = 17;
-pub const EVP_CTRL_GCM_SET_IV_FIXED: u32 = 18;
+pub const EVP_CTRL_AEAD_SET_IVLEN: u32 = 9;
+pub const EVP_CTRL_AEAD_GET_TAG: u32 = 16;
+pub const EVP_CTRL_AEAD_SET_TAG: u32 = 17;
+pub const EVP_CTRL_AEAD_SET_IV_FIXED: u32 = 18;
 pub const EVP_CTRL_GCM_IV_GEN: u32 = 19;
 pub const EVP_CTRL_AEAD_SET_MAC_KEY: u32 = 23;
 pub const EVP_CTRL_GCM_SET_IV_INV: u32 = 24;
 pub const EVP_GCM_TLS_FIXED_IV_LEN: u32 = 4;
 pub const EVP_GCM_TLS_EXPLICIT_IV_LEN: u32 = 8;
 pub const EVP_GCM_TLS_TAG_LEN: u32 = 16;
+pub const EVP_CTRL_GCM_SET_IVLEN: u32 = 9;
+pub const EVP_CTRL_GCM_GET_TAG: u32 = 16;
+pub const EVP_CTRL_GCM_SET_TAG: u32 = 17;
+pub const EVP_CTRL_GCM_SET_IV_FIXED: u32 = 18;
 pub const EVP_MAX_KEY_LENGTH: u32 = 64;
 pub const EVP_MAX_IV_LENGTH: u32 = 16;
 pub const EVP_MAX_BLOCK_LENGTH: u32 = 32;
@@ -684,6 +688,7 @@ pub const EC_R_INVALID_SCALAR: u32 = 133;
 pub const ECDH_R_KDF_FAILED: u32 = 100;
 pub const ECDH_R_NO_PRIVATE_VALUE: u32 = 101;
 pub const ECDH_R_POINT_ARITHMETIC_FAILURE: u32 = 102;
+pub const ECDH_R_UNKNOWN_DIGEST_LENGTH: u32 = 103;
 pub const ECDSA_R_BAD_SIGNATURE: u32 = 100;
 pub const ECDSA_R_MISSING_PARAMETERS: u32 = 101;
 pub const ECDSA_R_NEED_NEW_SETUP_VALUES: u32 = 102;
@@ -1641,6 +1646,7 @@ pub const NID_kx_any: u32 = 957;
 pub const NID_auth_any: u32 = 958;
 pub const EVP_PKEY_NONE: u32 = 0;
 pub const EVP_PKEY_RSA: u32 = 6;
+pub const EVP_PKEY_RSA_PSS: u32 = 912;
 pub const EVP_PKEY_DSA: u32 = 116;
 pub const EVP_PKEY_EC: u32 = 408;
 pub const EVP_PKEY_ED25519: u32 = 949;
@@ -1882,6 +1888,9 @@ extern "C" {
 }
 extern "C" {
     pub fn EVP_aead_chacha20_poly1305() -> *const EVP_AEAD;
+}
+extern "C" {
+    pub fn EVP_aead_xchacha20_poly1305() -> *const EVP_AEAD;
 }
 extern "C" {
     pub fn EVP_aead_aes_128_ctr_hmac_sha256() -> *const EVP_AEAD;
@@ -7694,6 +7703,9 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    pub fn OPENSSL_cleanup();
+}
+extern "C" {
     pub fn X25519_keypair(out_public_value: *mut u8, out_private_key: *mut u8);
 }
 extern "C" {
@@ -9265,6 +9277,14 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    pub fn ECDH_compute_key_fips(
+        out: *mut u8,
+        out_len: usize,
+        pub_key: *const EC_POINT,
+        priv_key: *const EC_KEY,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
     pub fn ECDSA_sign(
         type_: ::std::os::raw::c_int,
         digest: *const u8,
@@ -9408,7 +9428,7 @@ extern "C" {
     pub fn EVP_PKEY_size(pkey: *const EVP_PKEY) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn EVP_PKEY_bits(pkey: *mut EVP_PKEY) -> ::std::os::raw::c_int;
+    pub fn EVP_PKEY_bits(pkey: *const EVP_PKEY) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn EVP_PKEY_id(pkey: *const EVP_PKEY) -> ::std::os::raw::c_int;
@@ -9423,10 +9443,10 @@ extern "C" {
     pub fn EVP_PKEY_assign_RSA(pkey: *mut EVP_PKEY, key: *mut RSA) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn EVP_PKEY_get0_RSA(pkey: *mut EVP_PKEY) -> *mut RSA;
+    pub fn EVP_PKEY_get0_RSA(pkey: *const EVP_PKEY) -> *mut RSA;
 }
 extern "C" {
-    pub fn EVP_PKEY_get1_RSA(pkey: *mut EVP_PKEY) -> *mut RSA;
+    pub fn EVP_PKEY_get1_RSA(pkey: *const EVP_PKEY) -> *mut RSA;
 }
 extern "C" {
     pub fn EVP_PKEY_set1_DSA(pkey: *mut EVP_PKEY, key: *mut DSA) -> ::std::os::raw::c_int;
@@ -9435,10 +9455,10 @@ extern "C" {
     pub fn EVP_PKEY_assign_DSA(pkey: *mut EVP_PKEY, key: *mut DSA) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn EVP_PKEY_get0_DSA(pkey: *mut EVP_PKEY) -> *mut DSA;
+    pub fn EVP_PKEY_get0_DSA(pkey: *const EVP_PKEY) -> *mut DSA;
 }
 extern "C" {
-    pub fn EVP_PKEY_get1_DSA(pkey: *mut EVP_PKEY) -> *mut DSA;
+    pub fn EVP_PKEY_get1_DSA(pkey: *const EVP_PKEY) -> *mut DSA;
 }
 extern "C" {
     pub fn EVP_PKEY_set1_EC_KEY(pkey: *mut EVP_PKEY, key: *mut EC_KEY) -> ::std::os::raw::c_int;
@@ -9447,10 +9467,10 @@ extern "C" {
     pub fn EVP_PKEY_assign_EC_KEY(pkey: *mut EVP_PKEY, key: *mut EC_KEY) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn EVP_PKEY_get0_EC_KEY(pkey: *mut EVP_PKEY) -> *mut EC_KEY;
+    pub fn EVP_PKEY_get0_EC_KEY(pkey: *const EVP_PKEY) -> *mut EC_KEY;
 }
 extern "C" {
-    pub fn EVP_PKEY_get1_EC_KEY(pkey: *mut EVP_PKEY) -> *mut EC_KEY;
+    pub fn EVP_PKEY_get1_EC_KEY(pkey: *const EVP_PKEY) -> *mut EC_KEY;
 }
 extern "C" {
     pub fn EVP_PKEY_new_ed25519_public(public_key: *const u8) -> *mut EVP_PKEY;
@@ -9857,10 +9877,10 @@ extern "C" {
     );
 }
 extern "C" {
-    pub fn EVP_PKEY_get0_DH(pkey: *mut EVP_PKEY) -> *mut DH;
+    pub fn EVP_PKEY_get0_DH(pkey: *const EVP_PKEY) -> *mut DH;
 }
 extern "C" {
-    pub fn EVP_PKEY_get1_DH(pkey: *mut EVP_PKEY) -> *mut DH;
+    pub fn EVP_PKEY_get1_DH(pkey: *const EVP_PKEY) -> *mut DH;
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
