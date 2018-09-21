@@ -9646,6 +9646,29 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    pub fn PKCS5_PBKDF2_HMAC(
+        password: *const ::std::os::raw::c_char,
+        password_len: usize,
+        salt: *const u8,
+        salt_len: usize,
+        iterations: ::std::os::raw::c_uint,
+        digest: *const EVP_MD,
+        key_len: usize,
+        out_key: *mut u8,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn PKCS5_PBKDF2_HMAC_SHA1(
+        password: *const ::std::os::raw::c_char,
+        password_len: usize,
+        salt: *const u8,
+        salt_len: usize,
+        iterations: ::std::os::raw::c_uint,
+        key_len: usize,
+        out_key: *mut u8,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
     pub fn EVP_PBE_scrypt(
         password: *const ::std::os::raw::c_char,
         password_len: usize,
