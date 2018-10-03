@@ -49,15 +49,8 @@ var skipped_files = map[string]bool{
 	"/stack-note.S":      true,
 }
 
-// These files have manual edits.  The hex string is the SHA256 digest of the original file; it will
-// be flagged as having changed if the digest doesn't match.
-var edited_files = map[string]string{
-	"/include/openssl/base.h": "f7334f90a17f2dccded5d9d361784dbf8291a60ad4c04147a06b2f59e0e49d51",
-}
-
-// This variable will be populated with files needing manual intervention, either because they are
-// edited in both uboringssl and BoringSSL, or because they exist in the former but not the latter.
-var manual_files = map[string]bool{}
+// This variable will be populated with files that exist in uboringssl but not BoringSSL.
+var missing_files = map[string]bool{}
 
 // Utility functions
 
@@ -124,7 +117,8 @@ func sha256sum(path string) string {
 
 // Adds all changes in the |repo| and commits them labeled by the triggering |revision|.
 func commitChanges(repoPath string) {
-	infof("  Committing changes...")
+	infof("  Committing changes to " + repoPath + "...")
+	repoPath = filepath.Join(*fuchsia, repoPath)
 	rev := getGitRevision(filepath.Join(*boring, "src"))
 	out := run(repoPath, "git", "status", "--short")
 	if len(out) == 0 {
@@ -218,19 +212,10 @@ func updateZircon() {
 			boringPath = filepath.Join(*boring, "src", stem)
 		}
 		if _, err = os.Stat(boringPath); os.IsNotExist(err) {
-			manual_files[stem] = true
-		}
-		// Check for files needing manual changes based on original file's digest
-		boringHash := sha256sum(boringPath)
-		zirconHash, found := edited_files[stem]
-		if found {
-			if boringHash != zirconHash {
-				manual_files[stem] = true
-			}
-			return nil
+			missing_files[stem] = true
 		}
 		// Copy files that have changed
-		if boringHash != sha256sum(zirconPath) {
+		if sha256sum(boringPath) != sha256sum(zirconPath) {
 			run(*fuchsia, "cp", boringPath, zirconPath)
 		}
 		return nil
@@ -307,14 +292,14 @@ func main() {
 	if !*skipZircon {
 		infof("Updating Zircon's uboringssl library...")
 		updateZircon()
-		tests["/boot/test/sys/crypto_test"] = true
+		tests["/system/test/sys/crypto_test"] = true
 		commits["zircon"] = true
 		infof("Done!")
 	}
-	// Warn about missing and edited files; these files probably need manual intervention
-	if len(manual_files) != 0 {
-		warnf("ERROR: These files could not be automatically resolved:")
-		for file := range manual_files {
+	// Warn about missing files
+	if len(missing_files) != 0 {
+		warnf("ERROR: These files are missing from upstream:")
+		for file := range missing_files {
 			warnf(file)
 		}
 		log.Fatal("Please resolve these files and try again.")
@@ -327,7 +312,7 @@ func main() {
 			commitChanges(commit)
 		}
 		updateGarnet()
-		commitChanges(*garnet)
+		commitChanges("garnet")
 		commits["garnet"] = true
 		infof("Done!")
 	}
