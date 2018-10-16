@@ -23,6 +23,16 @@ if (is_fuchsia) {
   library_type = default_library_type
 }
 
+if (current_cpu == "arm64" && (is_fuchsia || is_linux)) {
+  crypto_sources += crypto_sources_linux_aarch64
+} else if (current_cpu == "x64" && (is_fuchsia || is_linux)) {
+  crypto_sources += crypto_sources_linux_x86_64
+} else if (current_cpu == "x64" && is_mac) {
+  crypto_sources += crypto_sources_mac_x86_64
+} else {
+  assert(false, "unsupported OS or CPU: {{current_os}}/{{current_cpu}}")
+}
+
 ################
 # libcrypto.so #
 ################
@@ -34,40 +44,11 @@ target(library_type, "crypto") {
   public = crypto_headers
   public_configs = [ ":boringssl_config" ]
   configs += [ ":internal_config" ]
-  if (current_cpu == "arm64") {
-    if (is_mac) {
-      sources += crypto_sources_ios_aarch64
-      configs += [ ":pthread_config" ]
-    } else if (is_fuchsia) {
-      # TODO(aarongreen): Switch once aarch64 once crypto/cpu-aarch64-fuchsia.c
-      # is upstreamed.
-      # sources += crypto_sources_linux_aarch64
-      configs += [ ":no_asm_config" ]
-    } else if (is_linux) {
-      sources += crypto_sources_linux_aarch64
-      configs += [ ":pthread_config" ]
-    } else {
-      assert(false, "unsupported OS: {{current_os}}")
-    }
-  } else if (current_cpu == "x64") {
-    if (is_mac) {
-      sources += crypto_sources_mac_x86_64
-      configs += [ ":pthread_config" ]
-    } else if (is_fuchsia) {
-      # Fuchsia assembly is the same as Linux on x86-64, for now; i.e. ELF.
-      sources += crypto_sources_linux_x86_64
-    } else if (is_linux) {
-      sources += crypto_sources_linux_x86_64
-      configs += [ ":pthread_config" ]
-    } else {
-      assert(false, "unsupported OS: {{current_os}}")
-    }
-  } else {
-    assert(false, "unsupported CPU: {{current_cpu}}")
-  }
   if (is_fuchsia) {
     include_base = "//third_party/boringssl/src/include"
     deps = [ "//zircon/public/lib/zxcpp" ]
+  } else {
+    configs += [ ":host_config" ]
   }
 }
 
@@ -223,13 +204,10 @@ config("internal_config") {
   ]
 }
 
-config("pthread_config") {
+config("host_config") {
+  visibility = [ ":*" ]
   # pthread_rwlock_t on host requires a feature flag.
   defines = [ "_XOPEN_SOURCE=700" ]
-}
-
-config("no_asm_config") {
-  defines = [ "OPENSSL_NO_ASM" ]
 }
 
 config("test_config") {
