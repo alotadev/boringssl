@@ -2,7 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/cpp/sdk_shared_library.gni")
 import("//build/fuzzing/fuzzer.gni")
 import("//build/package.gni")
 import("BUILD.generated.gni")
@@ -18,12 +17,6 @@ group("boringssl") {
   ]
 }
 
-if (is_fuchsia) {
-  library_type = "sdk_shared_library"
-} else {
-  library_type = default_library_type
-}
-
 if (current_cpu == "arm64" && (is_fuchsia || is_linux)) {
   crypto_sources += crypto_sources_linux_aarch64
 } else if (current_cpu == "x64" && (is_fuchsia || is_linux)) {
@@ -37,10 +30,7 @@ if (current_cpu == "arm64" && (is_fuchsia || is_linux)) {
 ################
 # libcrypto.so #
 ################
-target(library_type, "crypto") {
-  if (is_fuchsia) {
-    category = "partner"
-  }
+target(default_library_type, "crypto") {
   sources = crypto_sources
   public = crypto_headers
   public_configs = [ ":boringssl_config" ]
@@ -55,17 +45,13 @@ target(library_type, "crypto") {
   }
   configs += [ ":internal_config" ]
   if (is_fuchsia) {
-    include_base = "//third_party/boringssl/src/include"
     deps = [ "//zircon/public/lib/zxcpp" ]
   } else {
     configs += [ ":host_config" ]
   }
 }
 
-target(library_type, "ssl") {
-  if (is_fuchsia) {
-    category = "partner"
-  }
+target(default_library_type, "ssl") {
   sources = ssl_sources
   public = ssl_headers
   public_configs = [ ":boringssl_config" ]
@@ -74,8 +60,6 @@ target(library_type, "ssl") {
     ":crypto",
   ]
   if (is_fuchsia) {
-    runtime_deps = [ ":crypto_sdk" ]
-    include_base = "//third_party/boringssl/src/include"
     deps += [ "//zircon/public/lib/zxcpp" ]
   }
 }
