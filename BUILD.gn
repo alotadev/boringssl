@@ -45,7 +45,7 @@ target(default_library_type, "crypto") {
   }
   configs += [ ":internal_config" ]
   if (is_fuchsia) {
-    deps = [ "//zircon/public/lib/zxcpp" ]
+    configs += [ "//build/config/fuchsia:static_cpp_standard_library" ]
   } else {
     configs += [ ":host_config" ]
   }
@@ -60,7 +60,7 @@ target(default_library_type, "ssl") {
     ":crypto",
   ]
   if (is_fuchsia) {
-    deps += [ "//zircon/public/lib/zxcpp" ]
+    configs += [ "//build/config/fuchsia:static_cpp_standard_library" ]
   }
 }
 
