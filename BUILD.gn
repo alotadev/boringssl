@@ -69,13 +69,13 @@ target(default_library_type, "ssl") {
 ##########################
 if (is_fuchsia) {
   package("boringssl_tool") {
-    deprecated_system_image = true
     deps = [
       ":bssl",
     ]
     binaries = [
       {
         name = "bssl"
+        shell = true
       },
     ]
   }
