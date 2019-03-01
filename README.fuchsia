@@ -9,11 +9,12 @@ Description:
 A fork of OpenSSL, as described at https://www.imperialviolet.org/2014/06/20/boringssl.html
 
 To update:
-1. Make sure you have the Rust bindgen tool installed (at least version 0.37, https://github.com/rust-lang-nursery/rust-bindgen).
-2. Execute "go run roll_boringssl.go"
-3. Build and test Fuchsia as normal.
-4. Update //zircon/third_party/ulib/uboringssl as documented there.
-5. Commit and push normally.  Note the resulting revision for the next step.
-6. Create and upload a CL that updates //garnet/manifest/boringssl
+1. Make sure you have the Rust bindgen tool installed (at least version 0.37,
+   https://github.com/rust-lang-nursery/rust-bindgen).
+2. Execute "go run roll_boringssl.go" and follow directions for building and testing
+3. Commit changes to this repository
+4. Update the BoringSSL manifest in the internal integration repository with this repository's
+   revision and the upstream revision. Verify with "check-integration".
 
-TODO(aarongreen): Document testing steps.
+Upstream revision:
+https://fuchsia.googlesource.com/third_party/boringssl/+/4b968339e3ced2d498f4182cd725243bb6cca81b/
