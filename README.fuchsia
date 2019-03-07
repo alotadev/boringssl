@@ -9,7 +9,7 @@ Description:
 A fork of OpenSSL, as described at https://www.imperialviolet.org/2014/06/20/boringssl.html
 
 To update:
-1. Make sure you have the Rust bindgen tool installed (at least version 0.37,
+1. Make sure you have Perl and the Rust bindgen tool installed (at least version 0.37,
    https://github.com/rust-lang-nursery/rust-bindgen).
 2. Execute "go run roll_boringssl.go" and follow directions for building and testing
 3. Commit changes to this repository
@@ -17,4 +17,4 @@ To update:
    revision and the upstream revision. Verify with "check-integration".
 
 Upstream revision:
-https://fuchsia.googlesource.com/third_party/boringssl/+/4b968339e3ced2d498f4182cd725243bb6cca81b/
+https://fuchsia.googlesource.com/third_party/boringssl/+/f9c8d30897c0acdb8ba8358ae8c0970a65bd7e2d/

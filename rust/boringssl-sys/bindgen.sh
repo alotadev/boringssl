@@ -56,5 +56,6 @@ EOF
 
 cat src/lib.rs >> "$TMP"
 mv "$TMP" src/lib.rs
+rustfmt src/lib.rs
 
 rm bindgen.h

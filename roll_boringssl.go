@@ -26,7 +26,6 @@ var (
 	boring  = flag.String("boring", "third_party/boringssl", "Path to repository")
 	commit  = flag.String("commit", "origin/upstream/master", "Upstream commit-ish to check out")
 	fuchsia = flag.String("fuchsia", os.Getenv("FUCHSIA_DIR"), "Fuchsia root directory")
-	garnet  = flag.String("garnet", "garnet/manifest", "Path to Garnet manifest directoy")
 	zircon  = flag.String("zircon", "zircon/third_party/ulib/uboringssl", "Path to Zircon library")
 
 	skipBoring = flag.Bool("skip-boring", false, "Don't update upstream sources or build files")
@@ -38,7 +37,6 @@ var (
 var skipped_files = map[string]bool{
 	"/BUILD.gn":          true,
 	"/README.fuchsia.md": true,
-	"/rules.mk":          true,
 	"/stack-note.S":      true,
 }
 
@@ -88,11 +86,6 @@ func sha256sum(path string) string {
 func updateReadMe(readmePath string) {
 	infof("  Updating README file...")
 
-	// Get the git revision
-	rev := run(filepath.Join(*boring, "src"), "git", "rev-list", "HEAD", "--max-count=1")
-	revlen := int64(len(rev))
-	rev[revlen-1] = '/'
-
 	// Open the README.fuchsia file
 	readme, err := os.OpenFile(readmePath, os.O_RDWR, 0644)
 	if err != nil {
@@ -110,6 +103,7 @@ func updateReadMe(readmePath string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	revlen := int64(len(*commit)) + 1
 	if info.Size() > urllen+revlen {
 		off = info.Size() - (urllen + revlen + 1)
 	}
@@ -117,11 +111,12 @@ func updateReadMe(readmePath string) {
 		log.Fatal(err)
 	}
 	if int64(bytes_read) < urllen || urlbase != string(url) {
-		log.Fatal(readmePath + " does not end with a valid git URL.")
+		log.Fatal(readmePath + " does not end with a valid git URL")
 	}
 
 	// Write the new git revision into the URL
-	if _, err = readme.Write(rev); err != nil {
+	off += urllen
+	if _, err = readme.WriteAt([]byte(*commit + "/"), off); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -133,6 +128,8 @@ func updateBoring() {
 	infof("Updating sources...")
 	run(src, "git", "fetch")
 	run(src, "git", "checkout", *commit)
+	*commit = string(run(src, "git", "rev-list", "HEAD", "--max-count=1"))
+	*commit = strings.TrimSpace(*commit)
 
 	updateReadMe(filepath.Join(*boring, "README.fuchsia"))
 
