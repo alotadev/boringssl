@@ -14,4 +14,14 @@ rustc_library("boringssl-sys") {
     # only depend on libcrypto until we actually use the SSL bits
     "//third_party/boringssl:crypto",
   ]
+
+  if (current_toolchain == host_toolchain) {
+    # Unspeakable kludge to get the all wrong and completely fragile
+    # linking semantics for non_rust_deps to squeak through for the
+    # static libcrypto from boringssl.
+    crypto_out_dir = get_label_info(non_rust_deps[0], "target_out_dir")
+    static_libcrypto = rebase_path("$crypto_out_dir/libcrypto.a")
+    shlib_out_dir = get_label_info(":any($shlib_toolchain)", "root_out_dir")
+    write_file("$shlib_out_dir/libcrypto.so", [ "INPUT($static_libcrypto)" ])
+  }
 }
