@@ -34,25 +34,12 @@ if (current_cpu == "arm64" && (is_fuchsia || is_linux)) {
 ################
 # libcrypto.so #
 ################
+
 target(default_library_type, "crypto") {
   sources = crypto_sources
   public = crypto_headers
   public_configs = [ ":boringssl_config" ]
-  is_fuzzer = false
-  foreach(config, configs) {
-    if (config == "//build/config/sanitizers:fuzzer") {
-      is_fuzzer = true
-    }
-  }
-  if (is_fuzzer) {
-    configs += [ ":fuzz_config" ]
-  }
   configs += [ ":internal_config" ]
-  if (is_fuchsia) {
-    configs += [ "//build/config/fuchsia:static_cpp_standard_library" ]
-  } else {
-    configs += [ ":host_config" ]
-  }
 }
 
 target(default_library_type, "ssl") {
@@ -63,9 +50,21 @@ target(default_library_type, "ssl") {
   deps = [
     ":crypto",
   ]
-  if (is_fuchsia) {
-    configs += [ "//build/config/fuchsia:static_cpp_standard_library" ]
-  }
+}
+
+source_set("crypto_unsafe") {
+  sources = crypto_sources
+  public = crypto_headers
+  configs += [ ":fuzz_config" ]
+}
+
+source_set("ssl_unsafe") {
+  sources = ssl_sources
+  public = ssl_headers
+  configs += [ ":fuzz_config" ]
+  deps = [
+    ":crypto_unsafe",
+  ]
 }
 
 ##########################
@@ -183,29 +182,29 @@ if (is_fuchsia) {
   fuzzers -= [ "arm_cpuinfo" ]
 }
 
-foreach(fuzzer, fuzzers) {
-  fuzz_target("${fuzzer}_fuzzer") {
+_boringssl_fuzzers = []
+foreach(name, fuzzers) {
+  _boringssl_fuzzers += [ ":${name}_fuzzer" ]
+}
+
+foreach(name, fuzzers) {
+  fuzzer("${name}_fuzzer") {
     visibility = [ ":*" ]
     sources = [
-      "src/fuzz/${fuzzer}.cc",
+      "src/fuzz/${name}.cc",
     ]
     configs += [ ":fuzz_config" ]
     deps = [
-      ":crypto",
-      ":ssl",
+      ":crypto_unsafe",
+      ":ssl_unsafe",
     ]
   }
 }
 
-fuzz_package("boringssl_fuzzers") {
-  targets = []
-  foreach(fuzzer, fuzzers) {
-    targets += [ ":${fuzzer}_fuzzer" ]
-  }
-  sanitizers = [
-    "asan",
-    "ubsan",
-  ]
+fuzzers = []
+fuzzers_package("boringssl_fuzzers") {
+  fuzzers = _boringssl_fuzzers
+  generated_test_packge = "boringssl_fuzzer_tests"
 }
 
 ################################################################################
@@ -227,18 +226,18 @@ config("internal_config") {
     "BORINGSSL_SHARED_LIBRARY",
     "OPENSSL_SMALL",
   ]
+  if (!is_fuchsia) {
+    # pthread_rwlock_t on host requires a feature flag.
+    defines += [ "_XOPEN_SOURCE=700" ]
+  }
   cflags = [ "-Wno-unused-function" ]
   configs = [
     ":boringssl_config",
     "//build/config:shared_library_config",
   ]
-}
-
-config("host_config") {
-  visibility = [ ":*" ]
-
-  # pthread_rwlock_t on host requires a feature flag.
-  defines = [ "_XOPEN_SOURCE=700" ]
+  if (is_fuchsia) {
+    configs += [ "//build/config/fuchsia:static_cpp_standard_library" ]
+  }
 }
 
 config("test_config") {
