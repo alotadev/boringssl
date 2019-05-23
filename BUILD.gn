@@ -4,6 +4,7 @@
 
 import("//build/fuzzing/fuzzer.gni")
 import("//build/package.gni")
+import("//build/test/test_package.gni")
 import("BUILD.generated.gni")
 import("BUILD.generated_tests.gni")
 
@@ -118,8 +119,7 @@ executable("bssl") {
 # Unit tests #
 ##############
 if (is_fuchsia) {
-  package("boringssl_tests") {
-    testonly = true
+  unittest_package("boringssl_tests") {
     deps = [
       ":crypto_test",
       ":ssl_test",
