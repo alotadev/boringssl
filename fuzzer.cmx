@@ -1,5 +1,8 @@
 {
     "sandbox": {
-        "features": [ "root-ssl-certificates" ]
+        "features": [
+            "root-ssl-certificates",
+            "deprecated-ambient-replace-as-executable"
+        ]
     }
 }
