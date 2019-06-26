@@ -3,10 +3,13 @@
 # found in the LICENSE file.
 
 import("//build/fuzzing/fuzzer.gni")
-import("//build/package.gni")
-import("//build/test/test_package.gni")
 import("BUILD.generated.gni")
 import("BUILD.generated_tests.gni")
+
+if (is_fuchsia) {
+  import("//build/package.gni")
+  import("//build/test/test_package.gni")
+}
 
 ################################################################################
 # Public targets
@@ -83,7 +86,7 @@ if (is_fuchsia) {
 } else {
   group("boringssl_tool") {
     deps = [
-      ":bssl_tool",
+      ":bssl",
     ]
   }
 }
