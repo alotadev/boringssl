@@ -53,12 +53,16 @@ target(default_library_type, "ssl") {
 }
 
 source_set("crypto_unsafe") {
+  testonly = true
+  visibility = [ ":*" ]
   sources = crypto_sources
   public = crypto_headers
   configs += [ ":fuzz_config" ]
 }
 
 source_set("ssl_unsafe") {
+  testonly = true
+  visibility = [ ":*" ]
   sources = ssl_sources
   public = ssl_headers
   configs += [ ":fuzz_config" ]
@@ -177,17 +181,17 @@ executable("ssl_test") {
 ################################################################################
 # Fuzzers
 
+# Upstream BoringSSL defines a `fuzzers` global variable in the generated
+# GNI files; we rename it to avoid colliding with the similarly-named parameter
+# on the fuzzers_package.
+fuzzer_names = fuzzers
+
 # Explicitly remove the arm_cpuinfo fuzzer, which tests Linux-specific routines
 if (is_fuchsia) {
-  fuzzers -= [ "arm_cpuinfo" ]
+  fuzzer_names -= [ "arm_cpuinfo" ]
 }
 
-_boringssl_fuzzers = []
-foreach(name, fuzzers) {
-  _boringssl_fuzzers += [ ":${name}_fuzzer" ]
-}
-
-foreach(name, fuzzers) {
+foreach(name, fuzzer_names) {
   fuzzer("${name}_fuzzer") {
     visibility = [ ":*" ]
     sources = [
@@ -201,9 +205,11 @@ foreach(name, fuzzers) {
   }
 }
 
-fuzzers = []
 fuzzers_package("boringssl_fuzzers") {
-  fuzzers = _boringssl_fuzzers
+  fuzzers = []
+  foreach(name, fuzzer_names) {
+    fuzzers += [ ":${name}_fuzzer" ]
+  }
 }
 
 ################################################################################
