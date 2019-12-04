@@ -204,7 +204,6 @@ foreach(name, fuzzers) {
 fuzzers = []
 fuzzers_package("boringssl_fuzzers") {
   fuzzers = _boringssl_fuzzers
-  generated_test_packge = "boringssl_fuzzer_tests"
 }
 
 ################################################################################
