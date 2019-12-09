@@ -26,29 +26,10 @@ var (
 	boring  = flag.String("boring", "third_party/boringssl", "Path to repository")
 	commit  = flag.String("commit", "origin/upstream/master", "Upstream commit-ish to check out")
 	fuchsia = flag.String("fuchsia", os.Getenv("FUCHSIA_DIR"), "Fuchsia root directory")
-	zircon  = flag.String("zircon", "zircon/third_party/ulib/uboringssl", "Path to Zircon library")
 
 	skipBoring = flag.Bool("skip-boring", false, "Don't update upstream sources or build files")
 	skipRust   = flag.Bool("skip-rust", false, "Don't update Rust bindings")
-	skipZircon = flag.Bool("skip-zircon", false, "Don't update Zircon's uboringssl library")
 )
-
-// These uboringssl files don't needed to be rolled from BoringSSL.
-var skipped_files = map[string]bool{
-	"/BUILD.gn":          true,
-	"/README.fuchsia.md": true,
-	"/stack-note.S":      true,
-}
-
-// Utility functions
-
-func infof(msg string) {
-	log.Printf("[+] %s\n", msg)
-}
-
-func warnf(msg string) {
-	log.Printf("<!> %s\n", msg)
-}
 
 // Executes a command with the given |name| and |args| using |cwd| as the current working directory.
 func run(cwd string, name string, args ...string) []byte {
@@ -59,8 +40,8 @@ func run(cwd string, name string, args ...string) []byte {
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		cmdline := strings.Join(append([]string{name}, args...), " ")
-		warnf("Error returned for '" + cmdline + "'")
-		warnf("Output: " + string(out))
+		log.Printf("Error returned for '%s'.\n", cmdline)
+		log.Printf("Output: %s\n", string(out))
 		log.Fatal(err)
 	}
 	return out
@@ -81,10 +62,9 @@ func sha256sum(path string) string {
 	return hex.EncodeToString(digest.Sum(nil))
 }
 
-// Both the Zircon and third-party copies of BoringSSL have a README file that ends with the current
-// upstream git revision.  This function updates those files.
+// Updates the README.fuchsia.md file that ends with the current upstream git revision.
 func updateReadMe(readmePath string) {
-	infof("  Updating README file...")
+	log.Printf("  Updating README file...\n")
 
 	// Open the README.fuchsia file
 	readme, err := os.OpenFile(readmePath, os.O_RDWR, 0644)
@@ -125,7 +105,7 @@ func updateReadMe(readmePath string) {
 func updateBoring() {
 	src := filepath.Join(*boring, "src")
 
-	infof("Updating sources...")
+	log.Printf("Updating sources...\n")
 	run(src, "git", "fetch")
 	run(src, "git", "checkout", *commit)
 	*commit = string(run(src, "git", "rev-list", "HEAD", "--max-count=1"))
@@ -133,58 +113,13 @@ func updateBoring() {
 
 	updateReadMe(filepath.Join(*boring, "README.fuchsia"))
 
-	infof("Generating build files...")
+	log.Printf("Generating build files...\n")
 	run(*boring, "python", filepath.Join(src, "util", "generate_build_files.py"), "gn")
 }
 
 // Regenerates the Rust bindings
 func updateRust() {
 	run("", filepath.Join(*boring, "rust/boringssl-sys/bindgen.sh"))
-}
-
-// To update Zircon's uboringssl library, we update the revision number in the README file and
-// copy any files present in uboringssl that do not match their counterpart in BoringSSL
-func updateZircon() {
-	updateReadMe(filepath.Join(*zircon, "README.fuchsia.md"))
-
-	infof("  Updating sources from BoringSSL...")
-	missing_files := map[string]bool{}
-	walker := func(zirconPath string, zxInfo os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if zxInfo.IsDir() {
-			return nil
-		}
-		stem := zirconPath[len(*zircon):]
-		if skipped_files[stem] {
-			return nil
-		}
-		// Look for the matching file under boringssl or boringssl/src
-		boringPath := filepath.Join(*boring, stem)
-		if _, err = os.Stat(boringPath); os.IsNotExist(err) {
-			boringPath = filepath.Join(*boring, "src", stem)
-		}
-		if _, err = os.Stat(boringPath); os.IsNotExist(err) {
-			missing_files[stem] = true
-		}
-		// Copy files that have changed
-		if sha256sum(boringPath) != sha256sum(zirconPath) {
-			run(*fuchsia, "cp", boringPath, zirconPath)
-		}
-		return nil
-	}
-	if err := filepath.Walk(*zircon, walker); err != nil {
-		log.Fatal(err)
-	}
-	// Warn about missing files
-	if len(missing_files) != 0 {
-		warnf("ERROR: These files are missing from upstream:")
-		for file := range missing_files {
-			warnf(file)
-		}
-		log.Fatal("Please resolve these files and try again.")
-	}
 }
 
 // Main function
@@ -197,36 +132,23 @@ func main() {
 	*zircon = filepath.Join(*fuchsia, *zircon)
 
 	if !*skipBoring {
-		infof("Updating BoringSSL from upstream...")
+		log.Printf("Updating BoringSSL from upstream...\n")
 		updateBoring()
-		infof("Done!")
-		infof("")
-		infof("To test, please run:")
-		infof("  $ fx set ... --preinstall garnet/packages/tests/boringssl")
-		infof("  $ fx build")
-		infof("  $ fx serve")
-		infof("  $ fx run-test boringssl_tests")
-		infof("If tests pass; commit the changes in " + *boring)
-		infof("Then, update the BoringSSL revisions in the internal integration repository.")
+		log.Printf("Done!\n")
 	}
-
 	if !*skipRust {
-		infof("Updating Rust bindings...")
+		log.Printf("Updating Rust bindings...\n")
 		updateRust()
-		infof("Done!")
+		log.Printf("Done!\n")
 	}
 
-	if !*skipZircon {
-		infof("Updating Zircon's uboringssl library...")
-		updateZircon()
-		infof("Done!")
-		infof("")
-		infof("To test, please run launch Zircon and run:")
-		infof("  > k ut prng")
-		infof("  > /boot/test/sys/crypto_test")
-		infof("If tests pass; commit the changes in " + *zircon)
-	}
+	log.Printf("\n")
+	log.Printf("To test, please run:\n")
+	log.Printf("  $ fx set ... --with //third_party/boringssl:boringssl_tests\n")
+	log.Printf("  $ fx build\n")
+	log.Printf("  $ fx serve\n")
+	log.Printf("  $ fx run-test boringssl_tests\n")
 
-	infof("Finally, update the BoringSSL revisions in the internal integration repository.")
-	infof("You can use `" + *boring + "/check-integration`to verify the revisions.")
+	log.Printf("If tests pass; commit the changes in %s.\n", *boring)
+	log.Printf("Then, update the BoringSSL revisions in the internal integration repository.\n")
 }

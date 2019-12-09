@@ -6,12 +6,26 @@
 
 set -e
 
-# cd to the directory this script lives in
+# Hard-coded paths
+readonly LIBC="$FUCHSIA_DIR/zircon/third_party/ulib/musl"
+readonly BSSL="../../src"
+if [[ -z "$FUCHSIA_DIR" ]] ; then
+  echo "FUCHSIA_DIR not set."
+  exit 1
+elif [[ ! -d $LIBC ]] ; then
+  echo "Can't find libc."
+  exit 1
+elif [[ ! -d $BSSL ]] ; then
+  echo "Can't find BoringSSL."
+  exit 1
+fi
+
+# Go to the directory this script lives in
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 # Construct a header file which imports every BoringSSL header.
-for header in $(ls ../../src/include/openssl/); do
+for header in $(ls $BSSL/include/openssl/); do
     # Skip certain headers which contain platform-specific logic, and will not
     # compile on all platforms.
     if [[ "$header" != "arm_arch.h" && \
@@ -34,8 +48,14 @@ WHITELIST="(ERR|BIO|CRYPTO|RAND|V_ASN1|ASN1|B_ASN1|CBS_ASN1|CAST|EVP|CBS|CBB|CIP
 # becomes a problem, then the thing to do is probably to generate different
 # files for different platforms (bindgen_x86_64.rs, bindgen_arm64.rs, etc) and
 # conditionally compile them depending on target.
-bindgen bindgen.h --whitelist-function "$WHITELIST" --whitelist-type "$WHITELIST" \
-    --whitelist-var "$WHITELIST" -o src/lib.rs -- -I ../../src/include --target=x86_64-fuchsia
+bindgen bindgen.h \
+    --whitelist-function "$WHITELIST" \
+    --whitelist-type "$WHITELIST" \
+    --whitelist-var "$WHITELIST" \
+    -o src/lib.rs -- \
+    -I $BSSL/include \
+    -I $LIBC/include \
+    --target=x86_64-fuchsia
 
 TMP="$(mktemp)"
 
