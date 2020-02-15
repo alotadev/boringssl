@@ -31,6 +31,9 @@ if (current_cpu == "arm64" && (is_fuchsia || is_linux)) {
   assert(false, "unsupported OS or CPU: {{current_os}}/{{current_cpu}}")
 }
 
+# TODO(46139): remove this added source.
+crypto_sources += [ "src/decrepit/xts/xts.c" ]
+
 ################
 # libcrypto.so #
 ################
