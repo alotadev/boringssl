@@ -43,6 +43,10 @@ target(default_library_type, "crypto") {
   public = crypto_headers
   public_configs = [ ":boringssl_config" ]
   configs += [ ":internal_config" ]
+
+  # TODO(46910): UBSan has found an instance of undefined behavior in this target.
+  # Disable UBSan for this target temporarily until it is migrated into CI/CQ.
+  configs += [ "//build/config:temporarily_disable_ubsan_do_not_use" ]
 }
 
 target(default_library_type, "ssl") {
@@ -61,6 +65,10 @@ source_set("crypto_unsafe") {
   sources = crypto_sources
   public = crypto_headers
   configs += [ ":fuzz_config" ]
+
+  # TODO(46910): UBSan has found an instance of undefined behavior in this target.
+  # Disable UBSan for this target temporarily until it is migrated into CI/CQ.
+  configs += [ "//build/config:temporarily_disable_ubsan_do_not_use" ]
 }
 
 source_set("ssl_unsafe") {
