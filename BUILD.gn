@@ -3,13 +3,10 @@
 # found in the LICENSE file.
 
 import("//build/fuzzing/fuzzer.gni")
+import("//build/package.gni")
+import("//build/test/test_package.gni")
 import("BUILD.generated.gni")
 import("BUILD.generated_tests.gni")
-
-if (is_fuchsia) {
-  import("//build/package.gni")
-  import("//build/test/test_package.gni")
-}
 
 ################################################################################
 # Public targets
@@ -54,9 +51,7 @@ target(default_library_type, "ssl") {
   public = ssl_headers
   public_configs = [ ":boringssl_config" ]
   configs += [ ":internal_config" ]
-  deps = [
-    ":crypto",
-  ]
+  deps = [ ":crypto" ]
 }
 
 source_set("crypto_unsafe") {
@@ -77,9 +72,7 @@ source_set("ssl_unsafe") {
   sources = ssl_sources
   public = ssl_headers
   configs += [ ":fuzz_config" ]
-  deps = [
-    ":crypto_unsafe",
-  ]
+  deps = [ ":crypto_unsafe" ]
 }
 
 ##########################
@@ -87,9 +80,7 @@ source_set("ssl_unsafe") {
 ##########################
 if (is_fuchsia) {
   package("boringssl_tool") {
-    deps = [
-      ":bssl",
-    ]
+    deps = [ ":bssl" ]
     binaries = [
       {
         name = "bssl"
@@ -99,9 +90,7 @@ if (is_fuchsia) {
   }
 } else {
   group("boringssl_tool") {
-    deps = [
-      ":bssl",
-    ]
+    deps = [ ":bssl" ]
   }
 }
 
@@ -135,30 +124,32 @@ executable("bssl") {
 ##############
 # Unit tests #
 ##############
-if (is_fuchsia) {
-  unittest_package("boringssl_tests") {
-    deps = [
-      ":crypto_test",
-      ":ssl_test",
-    ]
-    tests = [
-      {
-        name = "crypto_test"
+unittest_package("boringssl_tests") {
+  deps = [
+    ":crypto_test",
+    ":ssl_test",
+  ]
+  tests = [
+    {
+      name = "crypto_test"
 
-        # This test takes a long time to run, and it is included in every subset
-        # of the Fuchsia build.
-        # TODO(bgoldman): Find a way to skip this test when runtests is set to
-        # skip "large" tests.
-        disabled = true
-      },
-      {
-        name = "ssl_test"
-      },
-    ]
-  }
-} else {
-  group("tests") {
-    testonly = true
+      # This test takes a long time to run, and it is included in every subset
+      # of the Fuchsia build.
+      # TODO(bgoldman): Find a way to skip this test when runtests is set to
+      # skip "large" tests.
+      disabled = true
+    },
+    {
+      name = "ssl_test"
+    },
+  ]
+}
+
+group("tests") {
+  testonly = true
+  if (is_fuchsia) {
+    deps = [ ":boringssl_tests" ]
+  } else {
     deps = [
       ":crypto_test",
       ":ssl_test",
@@ -205,9 +196,7 @@ if (is_fuchsia) {
 foreach(name, fuzzer_names) {
   fuzzer("${name}_fuzzer") {
     visibility = [ ":*" ]
-    sources = [
-      "src/fuzz/${name}.cc",
-    ]
+    sources = [ "src/fuzz/${name}.cc" ]
     configs += [ ":fuzz_config" ]
     deps = [
       ":crypto_unsafe",
