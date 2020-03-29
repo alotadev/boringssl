@@ -10,134 +10,119 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 )
 
-var (
-	commit = flag.String("commit", "origin/upstream/master", "Upstream commit-ish to check out")
-)
-
-// Executes a command with the given |name| and |args|.
-func run(name string, args ...string) string {
-	cmd := exec.Command(name, args...)
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		cmdline := strings.Join(append([]string{name}, args...), " ")
-		log.Printf("Error returned for '%s'.\n", cmdline)
-		log.Printf("Output: %s\n", string(out))
-		log.Fatal(err)
-	}
-	return strings.TrimSpace(string(out))
-}
-
-// Changes to the BoringSSL directory and resolves the git commit to a SHA-1.
-func configure() {
-	log.Printf("Configuring...\n")
+// Returns the path to the boringssl directory.
+func configure() string {
+	log.Println("Configuring...")
 	_, file, _, ok := runtime.Caller(0)
 	if !ok {
-		log.Fatal("Failed to find current executable.\n")
+		log.Fatal("failed to find current executable")
 	}
-	os.Chdir(filepath.Dir(file))
-
-	flag.Parse()
-	*commit = run("git", "rev-parse", *commit)
-	log.Printf("Commit resolved to %s\n", *commit)
+	return filepath.Dir(file)
 }
 
-// Copies sources from resolved commit to the working tree.
-func updateSources() {
-	log.Printf("Updating BoringSSL sources...\n")
-	var err error
-	if err = os.RemoveAll("src"); err != nil {
-		log.Fatalf("Failed to remove directory 'src': %v\n", err)
+// Updates BoringSSL sources and returns the revision.
+func updateSources(dir, commit string) []byte {
+	log.Println("Updating BoringSSL sources...")
+	dir = filepath.Join(dir, "src")
+	{
+		cmd := exec.Command("git", "-C", dir, "fetch", "--all", "--prune")
+		if err := cmd.Run(); err != nil {
+			log.Fatalf("%s failed: %s", cmd.Args, err)
+		}
 	}
-	if err = os.Mkdir("src", 0700); err != nil {
-		log.Fatalf("Failed to make directory 'src': %v\n", err)
+	{
+		cmd := exec.Command("git", "-C", dir, "checkout", commit)
+		if err := cmd.Run(); err != nil {
+			log.Fatalf("%s failed: %s", cmd.Args, err)
+		}
 	}
-	cmd1 := exec.Command("git", "archive", *commit, "--worktree-attributes")
-	cmd2 := exec.Command("tar", "xC", "src")
-	if cmd2.Stdin, err = cmd1.StdoutPipe(); err != nil {
-		log.Fatalf("Failed to create pipe from 'git': %v\n", err)
-	}
-	if err = cmd2.Start(); err != nil {
-		log.Fatalf("Failed to start 'tar': %v\n", err)
-	}
-	if err = cmd1.Run(); err != nil {
-		log.Fatalf("'git' returned error: %v\n", err)
-	}
-	if err = cmd2.Wait(); err != nil {
-		log.Fatalf("'tar' returned error: %v\n", err)
+	{
+		cmd := exec.Command("git", "-C", dir, "rev-parse", commit)
+		out, err := cmd.Output()
+		if err != nil {
+			log.Fatalf("%s failed: %s", cmd.Args, err)
+		}
+		return bytes.TrimSpace(out)
 	}
 }
 
 // Create the GN build files for the current sources.
-func generateGN() {
-	log.Printf("Generating build files...\n")
-	run("python", filepath.Join("src", "util", "generate_build_files.py"), "gn")
-}
-
-// Regenerates the Rust bindings
-func generateRustBindings() {
-	log.Printf("Generating Rust bindings...\n")
-	run(filepath.Join("rust", "boringssl-sys", "bindgen.sh"))
-}
-
-// Updates the README.md file that ends with the current upstream git revision.
-func updateReadMe() {
-	log.Printf("Updating README file...\n")
-	readme, err := os.OpenFile("README.fuchsia.md", os.O_RDWR, 0644)
-	if err != nil {
-		log.Fatalf("Failed to open README.md: %v\n", err)
+func generateGN(dir string) {
+	log.Printf("Generating build files...")
+	cmd := exec.Command("python", filepath.Join("src", "util", "generate_build_files.py"), "gn")
+	cmd.Dir = dir
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("%s failed: %s", cmd.Args, err)
 	}
-	defer readme.Close()
+}
 
-	// Check that the file ends with a git URL
-	const urlbase string = "https://fuchsia.googlesource.com/third_party/boringssl/+/"
-	urllen := int64(len(urlbase))
-	url := make([]byte, urllen)
-	off := int64(0)
-	var bytes_read int
+// Regenerates the Rust bindings.
+func generateRustBindings(dir string) {
+	log.Printf("Generating Rust bindings...")
+	cmd := exec.Command(filepath.Join("rust", "boringssl-sys", "bindgen.sh"))
+	cmd.Dir = dir
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("%s failed: %s", cmd.Args, err)
+	}
+}
+
+// Updates the README file that ends with the current upstream git revision.
+func updateReadMe(dir string, sha1 []byte) {
+	const readmeName = "README.fuchsia"
+	log.Printf("Updating %s...", readmeName)
+	readme, err := os.OpenFile(filepath.Join(dir, readmeName), os.O_RDWR, 0644)
+	if err != nil {
+		log.Fatalf("failed to open %s: %s", readmeName, err)
+	}
+	defer func() {
+		if err := readme.Close(); err != nil {
+			log.Fatalf("failed to close %s: %s", readmeName, err)
+		}
+	}()
+
+	// Assume that the file ends with a git URL.
 	info, err := readme.Stat()
 	if err != nil {
-		log.Fatalf("Failed to stat README.fuchsia.md: %v\n", err)
+		log.Fatalf("failed to stat %s: %s", readmeName, err)
 	}
-	revlen := int64(len(*commit)) + 1
-	if info.Size() > urllen+revlen {
-		off = info.Size() - (urllen + revlen + 1)
-	}
-	if bytes_read, err = readme.ReadAt(url, off); err != nil {
-		log.Fatalf("Failed to read from README.fuchsia.md: %v\n", err)
-	}
-	if int64(bytes_read) < urllen || urlbase != string(url) {
-		log.Fatal("README.fuchsia.md does not end with a valid git URL.\n")
-	}
-	off += urllen
-	if _, err = readme.WriteAt([]byte(*commit+"/"), off); err != nil {
-		log.Fatalf("Failed to write to README.fuchsia.md: %v\n", err)
+	offset := info.Size() - int64(len(sha1)+2 /* trailing newlines */)
+	if _, err = readme.WriteAt(sha1, offset); err != nil {
+		log.Fatalf("failed to write to %s: %s", readmeName, err)
 	}
 }
 
-// Main function
 func main() {
-	configure()
-	updateSources()
-	generateGN()
-	generateRustBindings()
-	updateReadMe()
+	commit := flag.String("commit", "origin/upstream/master", "Upstream commit-ish to check out")
 
-	log.Printf("\n")
-	log.Printf("To test, please run:\n")
-	log.Printf("  $ fx set ... --with //third_party/boringssl:tests\n")
-	log.Printf("  $ fx build\n")
-	log.Printf("  $ fx serve\n")
-	log.Printf("  $ fx run-test boringssl_tests\n")
+	flag.Parse()
 
-	log.Printf("If tests pass; commit the changes in //third_party/boringssl.\n")
-	log.Printf("Then, update the BoringSSL revision in the internal integration repository.\n")
+	log.SetFlags(log.Lmicroseconds)
+
+	dir := configure()
+	sha1 := updateSources(dir, *commit)
+
+	log.Printf("Commit resolved to %s", sha1)
+
+	generateGN(dir)
+	generateRustBindings(dir)
+	updateReadMe(dir, sha1)
+
+	log.Println()
+	log.Println("To test, please run:")
+	log.Println("  $ fx set ... --with //third_party/boringssl:tests")
+	log.Println("  $ fx build")
+	log.Println("  $ fx serve")
+	log.Println("  $ fx run-test boringssl_tests")
+
+	log.Println("If tests pass; commit the changes in //third_party/boringssl")
+	log.Println("Then, update the BoringSSL revision in the internal integration repository")
 }
