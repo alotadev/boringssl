@@ -244,7 +244,9 @@ pub const BN_RAND_BOTTOM_ANY: u32 = 0;
 pub const BN_RAND_BOTTOM_ODD: u32 = 1;
 pub const BN_GENCB_GENERATED: u32 = 0;
 pub const BN_GENCB_PRIME_TEST: u32 = 1;
-pub const BN_prime_checks: u32 = 0;
+pub const BN_prime_checks_for_validation: u32 = 32;
+pub const BN_prime_checks_for_generation: u32 = 0;
+pub const BN_prime_checks: u32 = 32;
 pub const BN_FLG_MALLOCED: u32 = 1;
 pub const BN_FLG_STATIC_DATA: u32 = 2;
 pub const BN_R_ARG2_LT_ARG3: u32 = 100;
@@ -590,6 +592,16 @@ pub const CIPHER_R_UNSUPPORTED_TAG_SIZE: u32 = 122;
 pub const CIPHER_R_WRONG_FINAL_BLOCK_LENGTH: u32 = 123;
 pub const CIPHER_R_NO_DIRECTION_SET: u32 = 124;
 pub const CIPHER_R_INVALID_NONCE: u32 = 125;
+pub const SHA_CBLOCK: u32 = 64;
+pub const SHA_DIGEST_LENGTH: u32 = 20;
+pub const SHA224_CBLOCK: u32 = 64;
+pub const SHA224_DIGEST_LENGTH: u32 = 28;
+pub const SHA256_CBLOCK: u32 = 64;
+pub const SHA256_DIGEST_LENGTH: u32 = 32;
+pub const SHA384_CBLOCK: u32 = 128;
+pub const SHA384_DIGEST_LENGTH: u32 = 48;
+pub const SHA512_CBLOCK: u32 = 128;
+pub const SHA512_DIGEST_LENGTH: u32 = 64;
 pub const RAND_MAX: u32 = 2147483647;
 pub const OPENSSL_VERSION_TEXT: &'static [u8; 38usize] = b"OpenSSL 1.1.0 (compatible; BoringSSL)\0";
 pub const OPENSSL_VERSION: u32 = 0;
@@ -644,6 +656,7 @@ pub const EVP_MAX_MD_SIZE: u32 = 64;
 pub const EVP_MAX_MD_BLOCK_SIZE: u32 = 128;
 pub const EVP_MD_FLAG_PKEY_DIGEST: u32 = 1;
 pub const EVP_MD_FLAG_DIGALGID_ABSENT: u32 = 2;
+pub const EVP_MD_FLAG_XOF: u32 = 4;
 pub const DIGEST_R_INPUT_NOT_INITIALIZED: u32 = 100;
 pub const DIGEST_R_DECODE_ERROR: u32 = 101;
 pub const DIGEST_R_UNKNOWN_HASH: u32 = 102;
@@ -654,6 +667,7 @@ pub const DSA_R_NEED_NEW_SETUP_VALUES: u32 = 103;
 pub const DSA_R_BAD_VERSION: u32 = 104;
 pub const DSA_R_DECODE_ERROR: u32 = 105;
 pub const DSA_R_ENCODE_ERROR: u32 = 106;
+pub const DSA_R_INVALID_PARAMETERS: u32 = 107;
 pub const OPENSSL_EC_NAMED_CURVE: u32 = 0;
 pub const OPENSSL_EC_EXPLICIT_CURVE: u32 = 1;
 pub const EC_R_BUFFER_TOO_SMALL: u32 = 100;
@@ -1653,14 +1667,19 @@ pub const NID_auth_psk: u32 = 956;
 pub const NID_kx_any: u32 = 957;
 pub const NID_auth_any: u32 = 958;
 pub const NID_CECPQ2: u32 = 959;
+pub const NID_ED448: u32 = 960;
+pub const NID_X448: u32 = 961;
 pub const EVP_PKEY_NONE: u32 = 0;
 pub const EVP_PKEY_RSA: u32 = 6;
 pub const EVP_PKEY_RSA_PSS: u32 = 912;
 pub const EVP_PKEY_DSA: u32 = 116;
 pub const EVP_PKEY_EC: u32 = 408;
 pub const EVP_PKEY_ED25519: u32 = 949;
+pub const EVP_PKEY_X25519: u32 = 948;
 pub const EVP_PKEY_DH: u32 = 28;
 pub const EVP_PKEY_RSA2: u32 = 19;
+pub const EVP_PKEY_X448: u32 = 961;
+pub const EVP_PKEY_ED448: u32 = 960;
 pub const EVP_R_BUFFER_TOO_SMALL: u32 = 100;
 pub const EVP_R_COMMAND_NOT_SUPPORTED: u32 = 101;
 pub const EVP_R_DECODE_ERROR: u32 = 102;
@@ -1695,6 +1714,8 @@ pub const EVP_R_NOT_A_PRIVATE_KEY: u32 = 130;
 pub const EVP_R_INVALID_SIGNATURE: u32 = 131;
 pub const EVP_R_MEMORY_LIMIT_EXCEEDED: u32 = 132;
 pub const EVP_R_INVALID_PARAMETERS: u32 = 133;
+pub const EVP_R_INVALID_PEER_KEY: u32 = 134;
+pub const EVP_R_NOT_XOF_OR_INVALID_LENGTH: u32 = 135;
 pub const RSA_PKCS1_PADDING: u32 = 1;
 pub const RSA_NO_PADDING: u32 = 3;
 pub const RSA_PKCS1_OAEP_PADDING: u32 = 4;
@@ -1754,16 +1775,6 @@ pub const RSA_R_WRONG_SIGNATURE_LENGTH: u32 = 145;
 pub const RSA_R_PUBLIC_KEY_VALIDATION_FAILED: u32 = 146;
 pub const RSA_R_D_OUT_OF_RANGE: u32 = 147;
 pub const RSA_R_BLOCK_TYPE_IS_NOT_02: u32 = 148;
-pub const SHA_CBLOCK: u32 = 64;
-pub const SHA_DIGEST_LENGTH: u32 = 20;
-pub const SHA224_CBLOCK: u32 = 64;
-pub const SHA224_DIGEST_LENGTH: u32 = 28;
-pub const SHA256_CBLOCK: u32 = 64;
-pub const SHA256_DIGEST_LENGTH: u32 = 32;
-pub const SHA384_CBLOCK: u32 = 128;
-pub const SHA384_DIGEST_LENGTH: u32 = 48;
-pub const SHA512_CBLOCK: u32 = 128;
-pub const SHA512_DIGEST_LENGTH: u32 = 64;
 pub const OPENSSL_NPN_UNSUPPORTED: u32 = 0;
 pub const OPENSSL_NPN_NEGOTIATED: u32 = 1;
 pub const OPENSSL_NPN_NO_OVERLAP: u32 = 2;
@@ -1952,6 +1963,9 @@ pub type X509 = x509_st;
 pub type OPENSSL_BLOCK = *mut ::std::os::raw::c_void;
 extern "C" {
     pub fn EVP_aead_aes_128_gcm() -> *const EVP_AEAD;
+}
+extern "C" {
+    pub fn EVP_aead_aes_192_gcm() -> *const EVP_AEAD;
 }
 extern "C" {
     pub fn EVP_aead_aes_256_gcm() -> *const EVP_AEAD;
@@ -2334,7 +2348,11 @@ extern "C" {
     ) -> u32;
 }
 extern "C" {
-    pub fn ERR_error_string_n(packed_error: u32, buf: *mut ::std::os::raw::c_char, len: size_t);
+    pub fn ERR_error_string_n(
+        packed_error: u32,
+        buf: *mut ::std::os::raw::c_char,
+        len: size_t,
+    ) -> *mut ::std::os::raw::c_char;
 }
 extern "C" {
     pub fn ERR_lib_error_string(packed_error: u32) -> *const ::std::os::raw::c_char;
@@ -2402,7 +2420,8 @@ pub const ERR_LIB_DIGEST: _bindgen_ty_1 = 29;
 pub const ERR_LIB_CIPHER: _bindgen_ty_1 = 30;
 pub const ERR_LIB_HKDF: _bindgen_ty_1 = 31;
 pub const ERR_LIB_USER: _bindgen_ty_1 = 32;
-pub const ERR_NUM_LIBS: _bindgen_ty_1 = 33;
+pub const ERR_LIB_TRUST_TOKEN: _bindgen_ty_1 = 33;
+pub const ERR_NUM_LIBS: _bindgen_ty_1 = 34;
 pub type _bindgen_ty_1 = u32;
 extern "C" {
     pub fn ERR_remove_state(pid: ::std::os::raw::c_ulong);
@@ -3793,7 +3812,7 @@ extern "C" {
     pub fn BN_enhanced_miller_rabin_primality_test(
         out_result: *mut bn_primality_result_t,
         w: *const BIGNUM,
-        iterations: ::std::os::raw::c_int,
+        checks: ::std::os::raw::c_int,
         ctx: *mut BN_CTX,
         cb: *mut BN_GENCB,
     ) -> ::std::os::raw::c_int;
@@ -6250,13 +6269,22 @@ extern "C" {
     pub fn CBS_get_u16(cbs: *mut CBS, out: *mut u16) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    pub fn CBS_get_u16le(cbs: *mut CBS, out: *mut u16) -> ::std::os::raw::c_int;
+}
+extern "C" {
     pub fn CBS_get_u24(cbs: *mut CBS, out: *mut u32) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn CBS_get_u32(cbs: *mut CBS, out: *mut u32) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    pub fn CBS_get_u32le(cbs: *mut CBS, out: *mut u32) -> ::std::os::raw::c_int;
+}
+extern "C" {
     pub fn CBS_get_u64(cbs: *mut CBS, out: *mut u64) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn CBS_get_u64le(cbs: *mut CBS, out: *mut u64) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn CBS_get_last_u8(cbs: *mut CBS, out: *mut u8) -> ::std::os::raw::c_int;
@@ -6321,6 +6349,9 @@ extern "C" {
 }
 extern "C" {
     pub fn CBS_get_asn1_uint64(cbs: *mut CBS, out: *mut u64) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn CBS_get_asn1_int64(cbs: *mut CBS, out: *mut i64) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn CBS_get_asn1_bool(
@@ -6427,7 +6458,7 @@ pub struct cbb_st {
     pub offset: size_t,
     pub pending_len_len: u8,
     pub pending_is_asn1: ::std::os::raw::c_char,
-    pub is_top_level: ::std::os::raw::c_char,
+    pub is_child: ::std::os::raw::c_char,
 }
 #[test]
 fn bindgen_test_layout_cbb_st() {
@@ -6463,9 +6494,9 @@ fn bindgen_test_layout_cbb_st() {
         concat!("Offset of field: ", stringify!(cbb_st), "::", stringify!(pending_is_asn1))
     );
     assert_eq!(
-        unsafe { &(*(::std::ptr::null::<cbb_st>())).is_top_level as *const _ as usize },
+        unsafe { &(*(::std::ptr::null::<cbb_st>())).is_child as *const _ as usize },
         26usize,
-        concat!("Offset of field: ", stringify!(cbb_st), "::", stringify!(is_top_level))
+        concat!("Offset of field: ", stringify!(cbb_st), "::", stringify!(is_child))
     );
 }
 extern "C" {
@@ -6545,19 +6576,31 @@ extern "C" {
     pub fn CBB_add_u16(cbb: *mut CBB, value: u16) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    pub fn CBB_add_u16le(cbb: *mut CBB, value: u16) -> ::std::os::raw::c_int;
+}
+extern "C" {
     pub fn CBB_add_u24(cbb: *mut CBB, value: u32) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn CBB_add_u32(cbb: *mut CBB, value: u32) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    pub fn CBB_add_u32le(cbb: *mut CBB, value: u32) -> ::std::os::raw::c_int;
+}
+extern "C" {
     pub fn CBB_add_u64(cbb: *mut CBB, value: u64) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn CBB_add_u64le(cbb: *mut CBB, value: u64) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn CBB_discard_child(cbb: *mut CBB);
 }
 extern "C" {
     pub fn CBB_add_asn1_uint64(cbb: *mut CBB, value: u64) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn CBB_add_asn1_int64(cbb: *mut CBB, value: i64) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn CBB_add_asn1_octet_string(
@@ -6736,7 +6779,7 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn EVP_CIPHER_CTX_reset(ctx: *mut EVP_CIPHER_CTX);
+    pub fn EVP_CIPHER_CTX_reset(ctx: *mut EVP_CIPHER_CTX) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn EVP_CipherInit_ex(
@@ -6962,6 +7005,9 @@ extern "C" {
 }
 extern "C" {
     pub fn EVP_aes_128_cfb128() -> *const EVP_CIPHER;
+}
+extern "C" {
+    pub fn EVP_aes_256_cfb128() -> *const EVP_CIPHER;
 }
 extern "C" {
     pub fn EVP_bf_ecb() -> *const EVP_CIPHER;
@@ -7231,6 +7277,343 @@ extern "C" {
     pub static mut OPENSSL_ia32cap_P: [u32; 4usize];
 }
 extern "C" {
+    pub fn SHA1_Init(sha: *mut SHA_CTX) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SHA1_Update(
+        sha: *mut SHA_CTX,
+        data: *const ::std::os::raw::c_void,
+        len: size_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SHA1_Final(out: *mut u8, sha: *mut SHA_CTX) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SHA1_Transform(sha: *mut SHA_CTX, block: *const u8);
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct sha_state_st {
+    pub __bindgen_anon_1: sha_state_st__bindgen_ty_1,
+    pub Nl: u32,
+    pub Nh: u32,
+    pub data: [u8; 64usize],
+    pub num: ::std::os::raw::c_uint,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union sha_state_st__bindgen_ty_1 {
+    pub h: [u32; 5usize],
+    pub __bindgen_anon_1: sha_state_st__bindgen_ty_1__bindgen_ty_1,
+    _bindgen_union_align: [u32; 5usize],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct sha_state_st__bindgen_ty_1__bindgen_ty_1 {
+    pub h0: u32,
+    pub h1: u32,
+    pub h2: u32,
+    pub h3: u32,
+    pub h4: u32,
+}
+#[test]
+fn bindgen_test_layout_sha_state_st__bindgen_ty_1__bindgen_ty_1() {
+    assert_eq!(
+        ::std::mem::size_of::<sha_state_st__bindgen_ty_1__bindgen_ty_1>(),
+        20usize,
+        concat!("Size of: ", stringify!(sha_state_st__bindgen_ty_1__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<sha_state_st__bindgen_ty_1__bindgen_ty_1>(),
+        4usize,
+        concat!("Alignment of ", stringify!(sha_state_st__bindgen_ty_1__bindgen_ty_1))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<sha_state_st__bindgen_ty_1__bindgen_ty_1>())).h0 as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(sha_state_st__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(h0)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<sha_state_st__bindgen_ty_1__bindgen_ty_1>())).h1 as *const _
+                as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(sha_state_st__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(h1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<sha_state_st__bindgen_ty_1__bindgen_ty_1>())).h2 as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(sha_state_st__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(h2)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<sha_state_st__bindgen_ty_1__bindgen_ty_1>())).h3 as *const _
+                as usize
+        },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(sha_state_st__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(h3)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<sha_state_st__bindgen_ty_1__bindgen_ty_1>())).h4 as *const _
+                as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(sha_state_st__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(h4)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_sha_state_st__bindgen_ty_1() {
+    assert_eq!(
+        ::std::mem::size_of::<sha_state_st__bindgen_ty_1>(),
+        20usize,
+        concat!("Size of: ", stringify!(sha_state_st__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<sha_state_st__bindgen_ty_1>(),
+        4usize,
+        concat!("Alignment of ", stringify!(sha_state_st__bindgen_ty_1))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha_state_st__bindgen_ty_1>())).h as *const _ as usize },
+        0usize,
+        concat!("Offset of field: ", stringify!(sha_state_st__bindgen_ty_1), "::", stringify!(h))
+    );
+}
+#[test]
+fn bindgen_test_layout_sha_state_st() {
+    assert_eq!(
+        ::std::mem::size_of::<sha_state_st>(),
+        96usize,
+        concat!("Size of: ", stringify!(sha_state_st))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<sha_state_st>(),
+        4usize,
+        concat!("Alignment of ", stringify!(sha_state_st))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha_state_st>())).Nl as *const _ as usize },
+        20usize,
+        concat!("Offset of field: ", stringify!(sha_state_st), "::", stringify!(Nl))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha_state_st>())).Nh as *const _ as usize },
+        24usize,
+        concat!("Offset of field: ", stringify!(sha_state_st), "::", stringify!(Nh))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha_state_st>())).data as *const _ as usize },
+        28usize,
+        concat!("Offset of field: ", stringify!(sha_state_st), "::", stringify!(data))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha_state_st>())).num as *const _ as usize },
+        92usize,
+        concat!("Offset of field: ", stringify!(sha_state_st), "::", stringify!(num))
+    );
+}
+extern "C" {
+    pub fn SHA224_Init(sha: *mut SHA256_CTX) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SHA224_Update(
+        sha: *mut SHA256_CTX,
+        data: *const ::std::os::raw::c_void,
+        len: size_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SHA224_Final(out: *mut u8, sha: *mut SHA256_CTX) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SHA256_Init(sha: *mut SHA256_CTX) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SHA256_Update(
+        sha: *mut SHA256_CTX,
+        data: *const ::std::os::raw::c_void,
+        len: size_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SHA256_Final(out: *mut u8, sha: *mut SHA256_CTX) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SHA256_Transform(sha: *mut SHA256_CTX, block: *const u8);
+}
+extern "C" {
+    pub fn SHA256_TransformBlocks(state: *mut u32, data: *const u8, num_blocks: size_t);
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct sha256_state_st {
+    pub h: [u32; 8usize],
+    pub Nl: u32,
+    pub Nh: u32,
+    pub data: [u8; 64usize],
+    pub num: ::std::os::raw::c_uint,
+    pub md_len: ::std::os::raw::c_uint,
+}
+#[test]
+fn bindgen_test_layout_sha256_state_st() {
+    assert_eq!(
+        ::std::mem::size_of::<sha256_state_st>(),
+        112usize,
+        concat!("Size of: ", stringify!(sha256_state_st))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<sha256_state_st>(),
+        4usize,
+        concat!("Alignment of ", stringify!(sha256_state_st))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha256_state_st>())).h as *const _ as usize },
+        0usize,
+        concat!("Offset of field: ", stringify!(sha256_state_st), "::", stringify!(h))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha256_state_st>())).Nl as *const _ as usize },
+        32usize,
+        concat!("Offset of field: ", stringify!(sha256_state_st), "::", stringify!(Nl))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha256_state_st>())).Nh as *const _ as usize },
+        36usize,
+        concat!("Offset of field: ", stringify!(sha256_state_st), "::", stringify!(Nh))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha256_state_st>())).data as *const _ as usize },
+        40usize,
+        concat!("Offset of field: ", stringify!(sha256_state_st), "::", stringify!(data))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha256_state_st>())).num as *const _ as usize },
+        104usize,
+        concat!("Offset of field: ", stringify!(sha256_state_st), "::", stringify!(num))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha256_state_st>())).md_len as *const _ as usize },
+        108usize,
+        concat!("Offset of field: ", stringify!(sha256_state_st), "::", stringify!(md_len))
+    );
+}
+extern "C" {
+    pub fn SHA384_Init(sha: *mut SHA512_CTX) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SHA384_Update(
+        sha: *mut SHA512_CTX,
+        data: *const ::std::os::raw::c_void,
+        len: size_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SHA384_Final(out: *mut u8, sha: *mut SHA512_CTX) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SHA512_Init(sha: *mut SHA512_CTX) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SHA512_Update(
+        sha: *mut SHA512_CTX,
+        data: *const ::std::os::raw::c_void,
+        len: size_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SHA512_Final(out: *mut u8, sha: *mut SHA512_CTX) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SHA512_Transform(sha: *mut SHA512_CTX, block: *const u8);
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct sha512_state_st {
+    pub h: [u64; 8usize],
+    pub Nl: u64,
+    pub Nh: u64,
+    pub p: [u8; 128usize],
+    pub num: ::std::os::raw::c_uint,
+    pub md_len: ::std::os::raw::c_uint,
+}
+#[test]
+fn bindgen_test_layout_sha512_state_st() {
+    assert_eq!(
+        ::std::mem::size_of::<sha512_state_st>(),
+        216usize,
+        concat!("Size of: ", stringify!(sha512_state_st))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<sha512_state_st>(),
+        8usize,
+        concat!("Alignment of ", stringify!(sha512_state_st))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha512_state_st>())).h as *const _ as usize },
+        0usize,
+        concat!("Offset of field: ", stringify!(sha512_state_st), "::", stringify!(h))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha512_state_st>())).Nl as *const _ as usize },
+        64usize,
+        concat!("Offset of field: ", stringify!(sha512_state_st), "::", stringify!(Nl))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha512_state_st>())).Nh as *const _ as usize },
+        72usize,
+        concat!("Offset of field: ", stringify!(sha512_state_st), "::", stringify!(Nh))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha512_state_st>())).p as *const _ as usize },
+        80usize,
+        concat!("Offset of field: ", stringify!(sha512_state_st), "::", stringify!(p))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha512_state_st>())).num as *const _ as usize },
+        208usize,
+        concat!("Offset of field: ", stringify!(sha512_state_st), "::", stringify!(num))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sha512_state_st>())).md_len as *const _ as usize },
+        212usize,
+        concat!("Offset of field: ", stringify!(sha512_state_st), "::", stringify!(md_len))
+    );
+}
+extern "C" {
     pub fn OPENSSL_malloc(size: size_t) -> *mut ::std::os::raw::c_void;
 }
 extern "C" {
@@ -7292,6 +7675,32 @@ extern "C" {
         format: *const ::std::os::raw::c_char,
         args: *mut __va_list_tag,
     ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn OPENSSL_strndup(
+        str: *const ::std::os::raw::c_char,
+        size: size_t,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn OPENSSL_memdup(
+        data: *const ::std::os::raw::c_void,
+        size: size_t,
+    ) -> *mut ::std::os::raw::c_void;
+}
+extern "C" {
+    pub fn OPENSSL_strlcpy(
+        dst: *mut ::std::os::raw::c_char,
+        src: *const ::std::os::raw::c_char,
+        dst_size: size_t,
+    ) -> size_t;
+}
+extern "C" {
+    pub fn OPENSSL_strlcat(
+        dst: *mut ::std::os::raw::c_char,
+        src: *const ::std::os::raw::c_char,
+        dst_size: size_t,
+    ) -> size_t;
 }
 extern "C" {
     pub fn OPENSSL_clear_free(ptr: *mut ::std::os::raw::c_void, len: size_t);
@@ -7511,6 +7920,21 @@ extern "C" {
     pub fn DH_up_ref(dh: *mut DH) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    pub fn DH_get0_pub_key(dh: *const DH) -> *const BIGNUM;
+}
+extern "C" {
+    pub fn DH_get0_priv_key(dh: *const DH) -> *const BIGNUM;
+}
+extern "C" {
+    pub fn DH_get0_p(dh: *const DH) -> *const BIGNUM;
+}
+extern "C" {
+    pub fn DH_get0_q(dh: *const DH) -> *const BIGNUM;
+}
+extern "C" {
+    pub fn DH_get0_g(dh: *const DH) -> *const BIGNUM;
+}
+extern "C" {
     pub fn DH_get0_key(
         dh: *const DH,
         out_pub_key: *mut *const BIGNUM,
@@ -7539,6 +7963,10 @@ extern "C" {
         q: *mut BIGNUM,
         g: *mut BIGNUM,
     ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn DH_set_length(dh: *mut DH, priv_length: ::std::os::raw::c_uint)
+        -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn BN_get_rfc3526_prime_1536(ret: *mut BIGNUM) -> *mut BIGNUM;
@@ -7859,6 +8287,16 @@ extern "C" {
 extern "C" {
     pub fn EVP_MD_CTX_destroy(ctx: *mut EVP_MD_CTX);
 }
+extern "C" {
+    pub fn EVP_DigestFinalXOF(
+        ctx: *mut EVP_MD_CTX,
+        out: *mut u8,
+        len: size_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn EVP_MD_meth_get_flags(md: *const EVP_MD) -> u32;
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct evp_md_pctx_ops {
@@ -7956,6 +8394,21 @@ extern "C" {
 }
 extern "C" {
     pub fn DSA_up_ref(dsa: *mut DSA) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn DSA_get0_pub_key(dsa: *const DSA) -> *const BIGNUM;
+}
+extern "C" {
+    pub fn DSA_get0_priv_key(dsa: *const DSA) -> *const BIGNUM;
+}
+extern "C" {
+    pub fn DSA_get0_p(dsa: *const DSA) -> *const BIGNUM;
+}
+extern "C" {
+    pub fn DSA_get0_q(dsa: *const DSA) -> *const BIGNUM;
+}
+extern "C" {
+    pub fn DSA_get0_g(dsa: *const DSA) -> *const BIGNUM;
 }
 extern "C" {
     pub fn DSA_get0_key(
@@ -8535,7 +8988,7 @@ extern "C" {
     pub fn EC_KEY_get0_private_key(key: *const EC_KEY) -> *const BIGNUM;
 }
 extern "C" {
-    pub fn EC_KEY_set_private_key(key: *mut EC_KEY, prv: *const BIGNUM) -> ::std::os::raw::c_int;
+    pub fn EC_KEY_set_private_key(key: *mut EC_KEY, priv_: *const BIGNUM) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn EC_KEY_get0_public_key(key: *const EC_KEY) -> *const EC_POINT;
@@ -8564,13 +9017,13 @@ extern "C" {
 extern "C" {
     pub fn EC_KEY_set_public_key_affine_coordinates(
         key: *mut EC_KEY,
-        x: *mut BIGNUM,
-        y: *mut BIGNUM,
+        x: *const BIGNUM,
+        y: *const BIGNUM,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn EC_KEY_key2buf(
-        key: *mut EC_KEY,
+        key: *const EC_KEY,
         form: point_conversion_form_t,
         out_buf: *mut *mut ::std::os::raw::c_uchar,
         ctx: *mut BN_CTX,
@@ -8581,6 +9034,13 @@ extern "C" {
 }
 extern "C" {
     pub fn EC_KEY_generate_key_fips(key: *mut EC_KEY) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn EC_KEY_derive_from_secret(
+        group: *const EC_GROUP,
+        secret: *const u8,
+        secret_len: size_t,
+    ) -> *mut EC_KEY;
 }
 extern "C" {
     pub fn EC_KEY_parse_private_key(cbs: *mut CBS, group: *const EC_GROUP) -> *mut EC_KEY;
@@ -8788,6 +9248,12 @@ extern "C" {
     pub fn ECDSA_SIG_free(sig: *mut ECDSA_SIG);
 }
 extern "C" {
+    pub fn ECDSA_SIG_get0_r(sig: *const ECDSA_SIG) -> *const BIGNUM;
+}
+extern "C" {
+    pub fn ECDSA_SIG_get0_s(sig: *const ECDSA_SIG) -> *const BIGNUM;
+}
+extern "C" {
     pub fn ECDSA_SIG_get0(
         sig: *const ECDSA_SIG,
         out_r: *mut *const BIGNUM,
@@ -8908,12 +9374,6 @@ extern "C" {
     pub fn EVP_PKEY_get1_EC_KEY(pkey: *const EVP_PKEY) -> *mut EC_KEY;
 }
 extern "C" {
-    pub fn EVP_PKEY_new_ed25519_public(public_key: *const u8) -> *mut EVP_PKEY;
-}
-extern "C" {
-    pub fn EVP_PKEY_new_ed25519_private(private_key: *const u8) -> *mut EVP_PKEY;
-}
-extern "C" {
     pub fn EVP_PKEY_assign(
         pkey: *mut EVP_PKEY,
         type_: ::std::os::raw::c_int,
@@ -8941,6 +9401,36 @@ extern "C" {
 }
 extern "C" {
     pub fn EVP_marshal_private_key(cbb: *mut CBB, key: *const EVP_PKEY) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn EVP_PKEY_new_raw_private_key(
+        type_: ::std::os::raw::c_int,
+        unused: *mut ENGINE,
+        in_: *const u8,
+        len: size_t,
+    ) -> *mut EVP_PKEY;
+}
+extern "C" {
+    pub fn EVP_PKEY_new_raw_public_key(
+        type_: ::std::os::raw::c_int,
+        unused: *mut ENGINE,
+        in_: *const u8,
+        len: size_t,
+    ) -> *mut EVP_PKEY;
+}
+extern "C" {
+    pub fn EVP_PKEY_get_raw_private_key(
+        pkey: *const EVP_PKEY,
+        out: *mut u8,
+        out_len: *mut size_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn EVP_PKEY_get_raw_public_key(
+        pkey: *const EVP_PKEY,
+        out: *mut u8,
+        out_len: *mut size_t,
+    ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn EVP_DigestSignInit(
@@ -9361,6 +9851,37 @@ extern "C" {
         encoding: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
 }
+extern "C" {
+    pub fn EVP_PKEY_set1_tls_encodedpoint(
+        pkey: *mut EVP_PKEY,
+        in_: *const u8,
+        len: size_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn EVP_PKEY_get1_tls_encodedpoint(pkey: *const EVP_PKEY, out_ptr: *mut *mut u8) -> size_t;
+}
+extern "C" {
+    pub fn EVP_PKEY_base_id(pkey: *const EVP_PKEY) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn EVP_PKEY_CTX_set_rsa_pss_keygen_md(
+        ctx: *mut EVP_PKEY_CTX,
+        md: *const EVP_MD,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn EVP_PKEY_CTX_set_rsa_pss_keygen_saltlen(
+        ctx: *mut EVP_PKEY_CTX,
+        salt_len: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn EVP_PKEY_CTX_set_rsa_pss_keygen_mgf1_md(
+        ctx: *mut EVP_PKEY_CTX,
+        md: *const EVP_MD,
+    ) -> ::std::os::raw::c_int;
+}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct evp_pkey_st {
@@ -9597,6 +10118,30 @@ extern "C" {
 }
 extern "C" {
     pub fn RSA_bits(rsa: *const RSA) -> ::std::os::raw::c_uint;
+}
+extern "C" {
+    pub fn RSA_get0_n(rsa: *const RSA) -> *const BIGNUM;
+}
+extern "C" {
+    pub fn RSA_get0_e(rsa: *const RSA) -> *const BIGNUM;
+}
+extern "C" {
+    pub fn RSA_get0_d(rsa: *const RSA) -> *const BIGNUM;
+}
+extern "C" {
+    pub fn RSA_get0_p(rsa: *const RSA) -> *const BIGNUM;
+}
+extern "C" {
+    pub fn RSA_get0_q(rsa: *const RSA) -> *const BIGNUM;
+}
+extern "C" {
+    pub fn RSA_get0_dmp1(rsa: *const RSA) -> *const BIGNUM;
+}
+extern "C" {
+    pub fn RSA_get0_dmq1(rsa: *const RSA) -> *const BIGNUM;
+}
+extern "C" {
+    pub fn RSA_get0_iqmp(rsa: *const RSA) -> *const BIGNUM;
 }
 extern "C" {
     pub fn RSA_get0_key(
@@ -10235,343 +10780,6 @@ impl rsa_st {
         });
         __bindgen_bitfield_unit
     }
-}
-extern "C" {
-    pub fn SHA1_Init(sha: *mut SHA_CTX) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SHA1_Update(
-        sha: *mut SHA_CTX,
-        data: *const ::std::os::raw::c_void,
-        len: size_t,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SHA1_Final(md: *mut u8, sha: *mut SHA_CTX) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SHA1_Transform(sha: *mut SHA_CTX, block: *const u8);
-}
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub struct sha_state_st {
-    pub __bindgen_anon_1: sha_state_st__bindgen_ty_1,
-    pub Nl: u32,
-    pub Nh: u32,
-    pub data: [u8; 64usize],
-    pub num: ::std::os::raw::c_uint,
-}
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub union sha_state_st__bindgen_ty_1 {
-    pub h: [u32; 5usize],
-    pub __bindgen_anon_1: sha_state_st__bindgen_ty_1__bindgen_ty_1,
-    _bindgen_union_align: [u32; 5usize],
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct sha_state_st__bindgen_ty_1__bindgen_ty_1 {
-    pub h0: u32,
-    pub h1: u32,
-    pub h2: u32,
-    pub h3: u32,
-    pub h4: u32,
-}
-#[test]
-fn bindgen_test_layout_sha_state_st__bindgen_ty_1__bindgen_ty_1() {
-    assert_eq!(
-        ::std::mem::size_of::<sha_state_st__bindgen_ty_1__bindgen_ty_1>(),
-        20usize,
-        concat!("Size of: ", stringify!(sha_state_st__bindgen_ty_1__bindgen_ty_1))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<sha_state_st__bindgen_ty_1__bindgen_ty_1>(),
-        4usize,
-        concat!("Alignment of ", stringify!(sha_state_st__bindgen_ty_1__bindgen_ty_1))
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<sha_state_st__bindgen_ty_1__bindgen_ty_1>())).h0 as *const _
-                as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(sha_state_st__bindgen_ty_1__bindgen_ty_1),
-            "::",
-            stringify!(h0)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<sha_state_st__bindgen_ty_1__bindgen_ty_1>())).h1 as *const _
-                as usize
-        },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(sha_state_st__bindgen_ty_1__bindgen_ty_1),
-            "::",
-            stringify!(h1)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<sha_state_st__bindgen_ty_1__bindgen_ty_1>())).h2 as *const _
-                as usize
-        },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(sha_state_st__bindgen_ty_1__bindgen_ty_1),
-            "::",
-            stringify!(h2)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<sha_state_st__bindgen_ty_1__bindgen_ty_1>())).h3 as *const _
-                as usize
-        },
-        12usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(sha_state_st__bindgen_ty_1__bindgen_ty_1),
-            "::",
-            stringify!(h3)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<sha_state_st__bindgen_ty_1__bindgen_ty_1>())).h4 as *const _
-                as usize
-        },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(sha_state_st__bindgen_ty_1__bindgen_ty_1),
-            "::",
-            stringify!(h4)
-        )
-    );
-}
-#[test]
-fn bindgen_test_layout_sha_state_st__bindgen_ty_1() {
-    assert_eq!(
-        ::std::mem::size_of::<sha_state_st__bindgen_ty_1>(),
-        20usize,
-        concat!("Size of: ", stringify!(sha_state_st__bindgen_ty_1))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<sha_state_st__bindgen_ty_1>(),
-        4usize,
-        concat!("Alignment of ", stringify!(sha_state_st__bindgen_ty_1))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha_state_st__bindgen_ty_1>())).h as *const _ as usize },
-        0usize,
-        concat!("Offset of field: ", stringify!(sha_state_st__bindgen_ty_1), "::", stringify!(h))
-    );
-}
-#[test]
-fn bindgen_test_layout_sha_state_st() {
-    assert_eq!(
-        ::std::mem::size_of::<sha_state_st>(),
-        96usize,
-        concat!("Size of: ", stringify!(sha_state_st))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<sha_state_st>(),
-        4usize,
-        concat!("Alignment of ", stringify!(sha_state_st))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha_state_st>())).Nl as *const _ as usize },
-        20usize,
-        concat!("Offset of field: ", stringify!(sha_state_st), "::", stringify!(Nl))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha_state_st>())).Nh as *const _ as usize },
-        24usize,
-        concat!("Offset of field: ", stringify!(sha_state_st), "::", stringify!(Nh))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha_state_st>())).data as *const _ as usize },
-        28usize,
-        concat!("Offset of field: ", stringify!(sha_state_st), "::", stringify!(data))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha_state_st>())).num as *const _ as usize },
-        92usize,
-        concat!("Offset of field: ", stringify!(sha_state_st), "::", stringify!(num))
-    );
-}
-extern "C" {
-    pub fn SHA224_Init(sha: *mut SHA256_CTX) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SHA224_Update(
-        sha: *mut SHA256_CTX,
-        data: *const ::std::os::raw::c_void,
-        len: size_t,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SHA224_Final(md: *mut u8, sha: *mut SHA256_CTX) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SHA256_Init(sha: *mut SHA256_CTX) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SHA256_Update(
-        sha: *mut SHA256_CTX,
-        data: *const ::std::os::raw::c_void,
-        len: size_t,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SHA256_Final(md: *mut u8, sha: *mut SHA256_CTX) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SHA256_Transform(sha: *mut SHA256_CTX, block: *const u8);
-}
-extern "C" {
-    pub fn SHA256_TransformBlocks(state: *mut u32, data: *const u8, num_blocks: size_t);
-}
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub struct sha256_state_st {
-    pub h: [u32; 8usize],
-    pub Nl: u32,
-    pub Nh: u32,
-    pub data: [u8; 64usize],
-    pub num: ::std::os::raw::c_uint,
-    pub md_len: ::std::os::raw::c_uint,
-}
-#[test]
-fn bindgen_test_layout_sha256_state_st() {
-    assert_eq!(
-        ::std::mem::size_of::<sha256_state_st>(),
-        112usize,
-        concat!("Size of: ", stringify!(sha256_state_st))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<sha256_state_st>(),
-        4usize,
-        concat!("Alignment of ", stringify!(sha256_state_st))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha256_state_st>())).h as *const _ as usize },
-        0usize,
-        concat!("Offset of field: ", stringify!(sha256_state_st), "::", stringify!(h))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha256_state_st>())).Nl as *const _ as usize },
-        32usize,
-        concat!("Offset of field: ", stringify!(sha256_state_st), "::", stringify!(Nl))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha256_state_st>())).Nh as *const _ as usize },
-        36usize,
-        concat!("Offset of field: ", stringify!(sha256_state_st), "::", stringify!(Nh))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha256_state_st>())).data as *const _ as usize },
-        40usize,
-        concat!("Offset of field: ", stringify!(sha256_state_st), "::", stringify!(data))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha256_state_st>())).num as *const _ as usize },
-        104usize,
-        concat!("Offset of field: ", stringify!(sha256_state_st), "::", stringify!(num))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha256_state_st>())).md_len as *const _ as usize },
-        108usize,
-        concat!("Offset of field: ", stringify!(sha256_state_st), "::", stringify!(md_len))
-    );
-}
-extern "C" {
-    pub fn SHA384_Init(sha: *mut SHA512_CTX) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SHA384_Update(
-        sha: *mut SHA512_CTX,
-        data: *const ::std::os::raw::c_void,
-        len: size_t,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SHA384_Final(md: *mut u8, sha: *mut SHA512_CTX) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SHA512_Init(sha: *mut SHA512_CTX) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SHA512_Update(
-        sha: *mut SHA512_CTX,
-        data: *const ::std::os::raw::c_void,
-        len: size_t,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SHA512_Final(md: *mut u8, sha: *mut SHA512_CTX) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SHA512_Transform(sha: *mut SHA512_CTX, block: *const u8);
-}
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub struct sha512_state_st {
-    pub h: [u64; 8usize],
-    pub Nl: u64,
-    pub Nh: u64,
-    pub p: [u8; 128usize],
-    pub num: ::std::os::raw::c_uint,
-    pub md_len: ::std::os::raw::c_uint,
-}
-#[test]
-fn bindgen_test_layout_sha512_state_st() {
-    assert_eq!(
-        ::std::mem::size_of::<sha512_state_st>(),
-        216usize,
-        concat!("Size of: ", stringify!(sha512_state_st))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<sha512_state_st>(),
-        8usize,
-        concat!("Alignment of ", stringify!(sha512_state_st))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha512_state_st>())).h as *const _ as usize },
-        0usize,
-        concat!("Offset of field: ", stringify!(sha512_state_st), "::", stringify!(h))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha512_state_st>())).Nl as *const _ as usize },
-        64usize,
-        concat!("Offset of field: ", stringify!(sha512_state_st), "::", stringify!(Nl))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha512_state_st>())).Nh as *const _ as usize },
-        72usize,
-        concat!("Offset of field: ", stringify!(sha512_state_st), "::", stringify!(Nh))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha512_state_st>())).p as *const _ as usize },
-        80usize,
-        concat!("Offset of field: ", stringify!(sha512_state_st), "::", stringify!(p))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha512_state_st>())).num as *const _ as usize },
-        208usize,
-        concat!("Offset of field: ", stringify!(sha512_state_st), "::", stringify!(num))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sha512_state_st>())).md_len as *const _ as usize },
-        212usize,
-        concat!("Offset of field: ", stringify!(sha512_state_st), "::", stringify!(md_len))
-    );
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
