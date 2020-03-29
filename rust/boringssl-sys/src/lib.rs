@@ -13,46 +13,35 @@ extern "C" {}
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct __BindgenBitfieldUnit<Storage, Align>
-where
-    Storage: AsRef<[u8]> + AsMut<[u8]>,
-{
+pub struct __BindgenBitfieldUnit<Storage, Align> {
     storage: Storage,
     align: [Align; 0],
 }
-
+impl<Storage, Align> __BindgenBitfieldUnit<Storage, Align> {
+    #[inline]
+    pub const fn new(storage: Storage) -> Self {
+        Self { storage, align: [] }
+    }
+}
 impl<Storage, Align> __BindgenBitfieldUnit<Storage, Align>
 where
     Storage: AsRef<[u8]> + AsMut<[u8]>,
 {
     #[inline]
-    pub fn new(storage: Storage) -> Self {
-        Self { storage, align: [] }
-    }
-
-    #[inline]
     pub fn get_bit(&self, index: usize) -> bool {
         debug_assert!(index / 8 < self.storage.as_ref().len());
-
         let byte_index = index / 8;
         let byte = self.storage.as_ref()[byte_index];
-
         let bit_index = if cfg!(target_endian = "big") { 7 - (index % 8) } else { index % 8 };
-
         let mask = 1 << bit_index;
-
         byte & mask == mask
     }
-
     #[inline]
     pub fn set_bit(&mut self, index: usize, val: bool) {
         debug_assert!(index / 8 < self.storage.as_ref().len());
-
         let byte_index = index / 8;
         let byte = &mut self.storage.as_mut()[byte_index];
-
         let bit_index = if cfg!(target_endian = "big") { 7 - (index % 8) } else { index % 8 };
-
         let mask = 1 << bit_index;
         if val {
             *byte |= mask;
@@ -60,15 +49,12 @@ where
             *byte &= !mask;
         }
     }
-
     #[inline]
     pub fn get(&self, bit_offset: usize, bit_width: u8) -> u64 {
         debug_assert!(bit_width <= 64);
         debug_assert!(bit_offset / 8 < self.storage.as_ref().len());
         debug_assert!((bit_offset + (bit_width as usize)) / 8 <= self.storage.as_ref().len());
-
         let mut val = 0;
-
         for i in 0..(bit_width as usize) {
             if self.get_bit(i + bit_offset) {
                 let index =
@@ -76,16 +62,13 @@ where
                 val |= 1 << index;
             }
         }
-
         val
     }
-
     #[inline]
     pub fn set(&mut self, bit_offset: usize, bit_width: u8, val: u64) {
         debug_assert!(bit_width <= 64);
         debug_assert!(bit_offset / 8 < self.storage.as_ref().len());
         debug_assert!((bit_offset + (bit_width as usize)) / 8 <= self.storage.as_ref().len());
-
         for i in 0..(bit_width as usize) {
             let mask = 1 << i;
             let val_bit_is_set = val & mask == mask;
@@ -250,10 +233,10 @@ pub const BIO_R_UNINITIALIZED: u32 = 114;
 pub const BIO_R_UNSUPPORTED_METHOD: u32 = 115;
 pub const BIO_R_WRITE_TO_READ_ONLY_BIO: u32 = 116;
 pub const BN_BITS2: u32 = 64;
-pub const BN_DEC_FMT1: &'static [u8; 4usize] = b"%lu\0";
-pub const BN_DEC_FMT2: &'static [u8; 7usize] = b"%019lu\0";
-pub const BN_HEX_FMT1: &'static [u8; 4usize] = b"%lx\0";
-pub const BN_HEX_FMT2: &'static [u8; 7usize] = b"%016lx\0";
+pub const BN_DEC_FMT1: &'static [u8; 2usize] = b"%\0";
+pub const BN_DEC_FMT2: &'static [u8; 5usize] = b"%019\0";
+pub const BN_HEX_FMT1: &'static [u8; 2usize] = b"%\0";
+pub const BN_HEX_FMT2: &'static [u8; 5usize] = b"%016\0";
 pub const BN_RAND_TOP_ANY: i32 = -1;
 pub const BN_RAND_TOP_ONE: u32 = 0;
 pub const BN_RAND_TOP_TWO: u32 = 1;
@@ -1787,10 +1770,8 @@ pub const OPENSSL_NPN_NO_OVERLAP: u32 = 2;
 pub const OPENSSL_INIT_NO_LOAD_SSL_STRINGS: u32 = 0;
 pub const OPENSSL_INIT_LOAD_SSL_STRINGS: u32 = 0;
 pub const OPENSSL_INIT_SSL_DEFAULT: u32 = 0;
-pub type __off_t = ::std::os::raw::c_long;
-pub type __off64_t = ::std::os::raw::c_long;
-pub type __time_t = ::std::os::raw::c_long;
-pub type time_t = __time_t;
+pub type size_t = ::std::os::raw::c_ulong;
+pub type time_t = ::std::os::raw::c_long;
 pub type CRYPTO_THREADID = ::std::os::raw::c_int;
 pub type ASN1_BOOLEAN = ::std::os::raw::c_int;
 pub type ASN1_NULL = ::std::os::raw::c_int;
@@ -2003,16 +1984,16 @@ extern "C" {
     pub fn EVP_has_aes_hardware() -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn EVP_AEAD_key_length(aead: *const EVP_AEAD) -> usize;
+    pub fn EVP_AEAD_key_length(aead: *const EVP_AEAD) -> size_t;
 }
 extern "C" {
-    pub fn EVP_AEAD_nonce_length(aead: *const EVP_AEAD) -> usize;
+    pub fn EVP_AEAD_nonce_length(aead: *const EVP_AEAD) -> size_t;
 }
 extern "C" {
-    pub fn EVP_AEAD_max_overhead(aead: *const EVP_AEAD) -> usize;
+    pub fn EVP_AEAD_max_overhead(aead: *const EVP_AEAD) -> size_t;
 }
 extern "C" {
-    pub fn EVP_AEAD_max_tag_len(aead: *const EVP_AEAD) -> usize;
+    pub fn EVP_AEAD_max_tag_len(aead: *const EVP_AEAD) -> size_t;
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -2092,8 +2073,8 @@ extern "C" {
     pub fn EVP_AEAD_CTX_new(
         aead: *const EVP_AEAD,
         key: *const u8,
-        key_len: usize,
-        tag_len: usize,
+        key_len: size_t,
+        tag_len: size_t,
     ) -> *mut EVP_AEAD_CTX;
 }
 extern "C" {
@@ -2104,8 +2085,8 @@ extern "C" {
         ctx: *mut EVP_AEAD_CTX,
         aead: *const EVP_AEAD,
         key: *const u8,
-        key_len: usize,
-        tag_len: usize,
+        key_len: size_t,
+        tag_len: size_t,
         impl_: *mut ENGINE,
     ) -> ::std::os::raw::c_int;
 }
@@ -2116,28 +2097,28 @@ extern "C" {
     pub fn EVP_AEAD_CTX_seal(
         ctx: *const EVP_AEAD_CTX,
         out: *mut u8,
-        out_len: *mut usize,
-        max_out_len: usize,
+        out_len: *mut size_t,
+        max_out_len: size_t,
         nonce: *const u8,
-        nonce_len: usize,
+        nonce_len: size_t,
         in_: *const u8,
-        in_len: usize,
+        in_len: size_t,
         ad: *const u8,
-        ad_len: usize,
+        ad_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn EVP_AEAD_CTX_open(
         ctx: *const EVP_AEAD_CTX,
         out: *mut u8,
-        out_len: *mut usize,
-        max_out_len: usize,
+        out_len: *mut size_t,
+        max_out_len: size_t,
         nonce: *const u8,
-        nonce_len: usize,
+        nonce_len: size_t,
         in_: *const u8,
-        in_len: usize,
+        in_len: size_t,
         ad: *const u8,
-        ad_len: usize,
+        ad_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -2145,16 +2126,16 @@ extern "C" {
         ctx: *const EVP_AEAD_CTX,
         out: *mut u8,
         out_tag: *mut u8,
-        out_tag_len: *mut usize,
-        max_out_tag_len: usize,
+        out_tag_len: *mut size_t,
+        max_out_tag_len: size_t,
         nonce: *const u8,
-        nonce_len: usize,
+        nonce_len: size_t,
         in_: *const u8,
-        in_len: usize,
+        in_len: size_t,
         extra_in: *const u8,
-        extra_in_len: usize,
+        extra_in_len: size_t,
         ad: *const u8,
-        ad_len: usize,
+        ad_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -2162,13 +2143,13 @@ extern "C" {
         ctx: *const EVP_AEAD_CTX,
         out: *mut u8,
         nonce: *const u8,
-        nonce_len: usize,
+        nonce_len: size_t,
         in_: *const u8,
-        in_len: usize,
+        in_len: size_t,
         in_tag: *const u8,
-        in_tag_len: usize,
+        in_tag_len: size_t,
         ad: *const u8,
-        ad_len: usize,
+        ad_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -2224,8 +2205,8 @@ extern "C" {
         ctx: *mut EVP_AEAD_CTX,
         aead: *const EVP_AEAD,
         key: *const u8,
-        key_len: usize,
-        tag_len: usize,
+        key_len: size_t,
+        tag_len: size_t,
         dir: evp_aead_direction_t,
     ) -> ::std::os::raw::c_int;
 }
@@ -2233,252 +2214,30 @@ extern "C" {
     pub fn EVP_AEAD_CTX_get_iv(
         ctx: *const EVP_AEAD_CTX,
         out_iv: *mut *const u8,
-        out_len: *mut usize,
+        out_len: *mut size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn EVP_AEAD_CTX_tag_len(
         ctx: *const EVP_AEAD_CTX,
-        out_tag_len: *mut usize,
-        in_len: usize,
-        extra_in_len: usize,
+        out_tag_len: *mut size_t,
+        in_len: size_t,
+        extra_in_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
-pub type FILE = _IO_FILE;
 pub type va_list = __builtin_va_list;
-pub type _IO_lock_t = ::std::os::raw::c_void;
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct _IO_marker {
-    pub _next: *mut _IO_marker,
-    pub _sbuf: *mut _IO_FILE,
-    pub _pos: ::std::os::raw::c_int,
-}
-#[test]
-fn bindgen_test_layout__IO_marker() {
-    assert_eq!(
-        ::std::mem::size_of::<_IO_marker>(),
-        24usize,
-        concat!("Size of: ", stringify!(_IO_marker))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<_IO_marker>(),
-        8usize,
-        concat!("Alignment of ", stringify!(_IO_marker))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_marker>()))._next as *const _ as usize },
-        0usize,
-        concat!("Offset of field: ", stringify!(_IO_marker), "::", stringify!(_next))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_marker>()))._sbuf as *const _ as usize },
-        8usize,
-        concat!("Offset of field: ", stringify!(_IO_marker), "::", stringify!(_sbuf))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_marker>()))._pos as *const _ as usize },
-        16usize,
-        concat!("Offset of field: ", stringify!(_IO_marker), "::", stringify!(_pos))
-    );
-}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _IO_FILE {
-    pub _flags: ::std::os::raw::c_int,
-    pub _IO_read_ptr: *mut ::std::os::raw::c_char,
-    pub _IO_read_end: *mut ::std::os::raw::c_char,
-    pub _IO_read_base: *mut ::std::os::raw::c_char,
-    pub _IO_write_base: *mut ::std::os::raw::c_char,
-    pub _IO_write_ptr: *mut ::std::os::raw::c_char,
-    pub _IO_write_end: *mut ::std::os::raw::c_char,
-    pub _IO_buf_base: *mut ::std::os::raw::c_char,
-    pub _IO_buf_end: *mut ::std::os::raw::c_char,
-    pub _IO_save_base: *mut ::std::os::raw::c_char,
-    pub _IO_backup_base: *mut ::std::os::raw::c_char,
-    pub _IO_save_end: *mut ::std::os::raw::c_char,
-    pub _markers: *mut _IO_marker,
-    pub _chain: *mut _IO_FILE,
-    pub _fileno: ::std::os::raw::c_int,
-    pub _flags2: ::std::os::raw::c_int,
-    pub _old_offset: __off_t,
-    pub _cur_column: ::std::os::raw::c_ushort,
-    pub _vtable_offset: ::std::os::raw::c_schar,
-    pub _shortbuf: [::std::os::raw::c_char; 1usize],
-    pub _lock: *mut _IO_lock_t,
-    pub _offset: __off64_t,
-    pub __pad1: *mut ::std::os::raw::c_void,
-    pub __pad2: *mut ::std::os::raw::c_void,
-    pub __pad3: *mut ::std::os::raw::c_void,
-    pub __pad4: *mut ::std::os::raw::c_void,
-    pub __pad5: usize,
-    pub _mode: ::std::os::raw::c_int,
-    pub _unused2: [::std::os::raw::c_char; 20usize],
+    _unused: [u8; 0],
 }
-#[test]
-fn bindgen_test_layout__IO_FILE() {
-    assert_eq!(
-        ::std::mem::size_of::<_IO_FILE>(),
-        216usize,
-        concat!("Size of: ", stringify!(_IO_FILE))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<_IO_FILE>(),
-        8usize,
-        concat!("Alignment of ", stringify!(_IO_FILE))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._flags as *const _ as usize },
-        0usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_flags))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._IO_read_ptr as *const _ as usize },
-        8usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_IO_read_ptr))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._IO_read_end as *const _ as usize },
-        16usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_IO_read_end))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._IO_read_base as *const _ as usize },
-        24usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_IO_read_base))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._IO_write_base as *const _ as usize },
-        32usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_IO_write_base))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._IO_write_ptr as *const _ as usize },
-        40usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_IO_write_ptr))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._IO_write_end as *const _ as usize },
-        48usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_IO_write_end))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._IO_buf_base as *const _ as usize },
-        56usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_IO_buf_base))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._IO_buf_end as *const _ as usize },
-        64usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_IO_buf_end))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._IO_save_base as *const _ as usize },
-        72usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_IO_save_base))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._IO_backup_base as *const _ as usize },
-        80usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_IO_backup_base))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._IO_save_end as *const _ as usize },
-        88usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_IO_save_end))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._markers as *const _ as usize },
-        96usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_markers))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._chain as *const _ as usize },
-        104usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_chain))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._fileno as *const _ as usize },
-        112usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_fileno))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._flags2 as *const _ as usize },
-        116usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_flags2))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._old_offset as *const _ as usize },
-        120usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_old_offset))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._cur_column as *const _ as usize },
-        128usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_cur_column))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._vtable_offset as *const _ as usize },
-        130usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_vtable_offset))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._shortbuf as *const _ as usize },
-        131usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_shortbuf))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._lock as *const _ as usize },
-        136usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_lock))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._offset as *const _ as usize },
-        144usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_offset))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>())).__pad1 as *const _ as usize },
-        152usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(__pad1))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>())).__pad2 as *const _ as usize },
-        160usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(__pad2))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>())).__pad3 as *const _ as usize },
-        168usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(__pad3))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>())).__pad4 as *const _ as usize },
-        176usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(__pad4))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>())).__pad5 as *const _ as usize },
-        184usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(__pad5))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._mode as *const _ as usize },
-        192usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_mode))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<_IO_FILE>()))._unused2 as *const _ as usize },
-        196usize,
-        concat!("Offset of field: ", stringify!(_IO_FILE), "::", stringify!(_unused2))
-    );
-}
+pub type FILE = _IO_FILE;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct buf_mem_st {
-    pub length: usize,
+    pub length: size_t,
     pub data: *mut ::std::os::raw::c_char,
-    pub max: usize,
+    pub max: size_t,
 }
 #[test]
 fn bindgen_test_layout_buf_mem_st() {
@@ -2575,7 +2334,7 @@ extern "C" {
     ) -> u32;
 }
 extern "C" {
-    pub fn ERR_error_string_n(packed_error: u32, buf: *mut ::std::os::raw::c_char, len: usize);
+    pub fn ERR_error_string_n(packed_error: u32, buf: *mut ::std::os::raw::c_char, len: size_t);
 }
 extern "C" {
     pub fn ERR_lib_error_string(packed_error: u32) -> *const ::std::os::raw::c_char;
@@ -2586,7 +2345,7 @@ extern "C" {
 pub type ERR_print_errors_callback_t = ::std::option::Option<
     unsafe extern "C" fn(
         str: *const ::std::os::raw::c_char,
-        len: usize,
+        len: size_t,
         ctx: *mut ::std::os::raw::c_void,
     ) -> ::std::os::raw::c_int,
 >;
@@ -2793,7 +2552,14 @@ extern "C" {
     );
 }
 extern "C" {
-    pub fn CRYPTO_get_locking_callback() -> ::std::option::Option<unsafe extern "C" fn()>;
+    pub fn CRYPTO_get_locking_callback() -> ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: ::std::os::raw::c_int,
+            arg2: ::std::os::raw::c_int,
+            arg3: *const ::std::os::raw::c_char,
+            arg4: ::std::os::raw::c_int,
+        ),
+    >;
 }
 extern "C" {
     pub fn CRYPTO_get_lock_name(lock_num: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char;
@@ -2880,14 +2646,31 @@ extern "C" {
     );
 }
 extern "C" {
-    pub fn CRYPTO_get_dynlock_create_callback(
-    ) -> ::std::option::Option<unsafe extern "C" fn() -> *mut CRYPTO_dynlock_value>;
+    pub fn CRYPTO_get_dynlock_create_callback() -> ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: *const ::std::os::raw::c_char,
+            arg2: ::std::os::raw::c_int,
+        ) -> *mut CRYPTO_dynlock_value,
+    >;
 }
 extern "C" {
-    pub fn CRYPTO_get_dynlock_lock_callback() -> ::std::option::Option<unsafe extern "C" fn()>;
+    pub fn CRYPTO_get_dynlock_lock_callback() -> ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: ::std::os::raw::c_int,
+            arg2: *mut CRYPTO_dynlock_value,
+            arg3: *const ::std::os::raw::c_char,
+            arg4: ::std::os::raw::c_int,
+        ),
+    >;
 }
 extern "C" {
-    pub fn CRYPTO_get_dynlock_destroy_callback() -> ::std::option::Option<unsafe extern "C" fn()>;
+    pub fn CRYPTO_get_dynlock_destroy_callback() -> ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut CRYPTO_dynlock_value,
+            arg2: *const ::std::os::raw::c_char,
+            arg3: ::std::os::raw::c_int,
+        ),
+    >;
 }
 extern "C" {
     pub fn BIO_new(method: *const BIO_METHOD) -> *mut BIO;
@@ -2926,7 +2709,7 @@ extern "C" {
     pub fn BIO_write_all(
         bio: *mut BIO,
         data: *const ::std::os::raw::c_void,
-        len: usize,
+        len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -3021,23 +2804,23 @@ extern "C" {
     ) -> ::std::os::raw::c_long;
 }
 extern "C" {
-    pub fn BIO_pending(bio: *const BIO) -> usize;
+    pub fn BIO_pending(bio: *const BIO) -> size_t;
 }
 extern "C" {
-    pub fn BIO_ctrl_pending(bio: *const BIO) -> usize;
+    pub fn BIO_ctrl_pending(bio: *const BIO) -> size_t;
 }
 extern "C" {
-    pub fn BIO_wpending(bio: *const BIO) -> usize;
+    pub fn BIO_wpending(bio: *const BIO) -> size_t;
 }
 extern "C" {
     pub fn BIO_set_close(bio: *mut BIO, close_flag: ::std::os::raw::c_int)
         -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn BIO_number_read(bio: *const BIO) -> usize;
+    pub fn BIO_number_read(bio: *const BIO) -> size_t;
 }
 extern "C" {
-    pub fn BIO_number_written(bio: *const BIO) -> usize;
+    pub fn BIO_number_written(bio: *const BIO) -> size_t;
 }
 extern "C" {
     pub fn BIO_push(bio: *mut BIO, appended_bio: *mut BIO) -> *mut BIO;
@@ -3075,7 +2858,7 @@ extern "C" {
     pub fn BIO_hexdump(
         bio: *mut BIO,
         data: *const u8,
-        len: usize,
+        len: size_t,
         indent: ::std::os::raw::c_uint,
     ) -> ::std::os::raw::c_int;
 }
@@ -3086,8 +2869,8 @@ extern "C" {
     pub fn BIO_read_asn1(
         bio: *mut BIO,
         out: *mut *mut u8,
-        out_len: *mut usize,
-        max_len: usize,
+        out_len: *mut size_t,
+        max_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -3103,7 +2886,7 @@ extern "C" {
     pub fn BIO_mem_contents(
         bio: *const BIO,
         out_contents: *mut *const u8,
-        out_len: *mut usize,
+        out_len: *mut size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -3230,16 +3013,16 @@ extern "C" {
 extern "C" {
     pub fn BIO_new_bio_pair(
         out1: *mut *mut BIO,
-        writebuf1: usize,
+        writebuf1: size_t,
         out2: *mut *mut BIO,
-        writebuf2: usize,
+        writebuf2: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn BIO_ctrl_get_read_request(bio: *mut BIO) -> usize;
+    pub fn BIO_ctrl_get_read_request(bio: *mut BIO) -> size_t;
 }
 extern "C" {
-    pub fn BIO_ctrl_get_write_guarantee(bio: *mut BIO) -> usize;
+    pub fn BIO_ctrl_get_write_guarantee(bio: *mut BIO) -> size_t;
 }
 extern "C" {
     pub fn BIO_shutdown_wr(bio: *mut BIO) -> ::std::os::raw::c_int;
@@ -3489,8 +3272,8 @@ pub struct bio_st {
     pub references: CRYPTO_refcount_t,
     pub ptr: *mut ::std::os::raw::c_void,
     pub next_bio: *mut BIO,
-    pub num_read: usize,
-    pub num_write: usize,
+    pub num_read: size_t,
+    pub num_write: size_t,
 }
 #[test]
 fn bindgen_test_layout_bio_st() {
@@ -3605,23 +3388,27 @@ extern "C" {
     pub fn BN_is_negative(bn: *const BIGNUM) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn BN_bin2bn(in_: *const u8, len: usize, ret: *mut BIGNUM) -> *mut BIGNUM;
+    pub fn BN_bin2bn(in_: *const u8, len: size_t, ret: *mut BIGNUM) -> *mut BIGNUM;
 }
 extern "C" {
-    pub fn BN_bn2bin(in_: *const BIGNUM, out: *mut u8) -> usize;
+    pub fn BN_bn2bin(in_: *const BIGNUM, out: *mut u8) -> size_t;
 }
 extern "C" {
-    pub fn BN_le2bn(in_: *const u8, len: usize, ret: *mut BIGNUM) -> *mut BIGNUM;
+    pub fn BN_le2bn(in_: *const u8, len: size_t, ret: *mut BIGNUM) -> *mut BIGNUM;
 }
 extern "C" {
-    pub fn BN_bn2le_padded(out: *mut u8, len: usize, in_: *const BIGNUM) -> ::std::os::raw::c_int;
+    pub fn BN_bn2le_padded(out: *mut u8, len: size_t, in_: *const BIGNUM) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn BN_bn2bin_padded(out: *mut u8, len: usize, in_: *const BIGNUM) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn BN_bn2cbb_padded(out: *mut CBB, len: usize, in_: *const BIGNUM)
+    pub fn BN_bn2bin_padded(out: *mut u8, len: size_t, in_: *const BIGNUM)
         -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn BN_bn2cbb_padded(
+        out: *mut CBB,
+        len: size_t,
+        in_: *const BIGNUM,
+    ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn BN_bn2hex(bn: *const BIGNUM) -> *mut ::std::os::raw::c_char;
@@ -3800,10 +3587,10 @@ extern "C" {
     pub fn BN_mod_word(a: *const BIGNUM, w: u64) -> u64;
 }
 extern "C" {
-    pub fn BN_mod_pow2(r: *mut BIGNUM, a: *const BIGNUM, e: usize) -> ::std::os::raw::c_int;
+    pub fn BN_mod_pow2(r: *mut BIGNUM, a: *const BIGNUM, e: size_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn BN_nnmod_pow2(r: *mut BIGNUM, a: *const BIGNUM, e: usize) -> ::std::os::raw::c_int;
+    pub fn BN_nnmod_pow2(r: *mut BIGNUM, a: *const BIGNUM, e: size_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn BN_nnmod(
@@ -4155,10 +3942,10 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn BN_bn2mpi(in_: *const BIGNUM, out: *mut u8) -> usize;
+    pub fn BN_bn2mpi(in_: *const BIGNUM, out: *mut u8) -> size_t;
 }
 extern "C" {
-    pub fn BN_mpi2bn(in_: *const u8, len: usize, out: *mut BIGNUM) -> *mut BIGNUM;
+    pub fn BN_mpi2bn(in_: *const u8, len: size_t, out: *mut BIGNUM) -> *mut BIGNUM;
 }
 extern "C" {
     pub fn BN_mod_exp_mont_word(
@@ -4844,12 +4631,10 @@ pub struct stack_st_ASN1_TYPE {
 }
 pub type ASN1_SEQUENCE_ANY = stack_st_ASN1_TYPE;
 extern "C" {
-    #[link_name = "\u{1}ASN1_SEQUENCE_ANY_it"]
-    pub static mut ASN1_SEQUENCE_ANY_it: ASN1_ITEM;
+    pub static ASN1_SEQUENCE_ANY_it: ASN1_ITEM;
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_SET_ANY_it"]
-    pub static mut ASN1_SET_ANY_it: ASN1_ITEM;
+    pub static ASN1_SET_ANY_it: ASN1_ITEM;
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -4887,8 +4672,7 @@ extern "C" {
     pub fn ASN1_TYPE_free(a: *mut ASN1_TYPE);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_ANY_it"]
-    pub static mut ASN1_ANY_it: ASN1_ITEM;
+    pub static ASN1_ANY_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_TYPE_get(a: *mut ASN1_TYPE) -> ::std::os::raw::c_int;
@@ -4917,8 +4701,7 @@ extern "C" {
     pub fn ASN1_OBJECT_free(a: *mut ASN1_OBJECT);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_OBJECT_it"]
-    pub static mut ASN1_OBJECT_it: ASN1_ITEM;
+    pub static ASN1_OBJECT_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_STRING_new() -> *mut ASN1_STRING;
@@ -4977,8 +4760,7 @@ extern "C" {
     pub fn ASN1_BIT_STRING_free(a: *mut ASN1_BIT_STRING);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_BIT_STRING_it"]
-    pub static mut ASN1_BIT_STRING_it: ASN1_ITEM;
+    pub static ASN1_BIT_STRING_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_BIT_STRING_set(
@@ -5014,8 +4796,7 @@ extern "C" {
     pub fn ASN1_INTEGER_free(a: *mut ASN1_INTEGER);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_INTEGER_it"]
-    pub static mut ASN1_INTEGER_it: ASN1_ITEM;
+    pub static ASN1_INTEGER_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_INTEGER_dup(x: *const ASN1_INTEGER) -> *mut ASN1_INTEGER;
@@ -5033,8 +4814,7 @@ extern "C" {
     pub fn ASN1_ENUMERATED_free(a: *mut ASN1_ENUMERATED);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_ENUMERATED_it"]
-    pub static mut ASN1_ENUMERATED_it: ASN1_ITEM;
+    pub static ASN1_ENUMERATED_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_UTCTIME_check(a: *const ASN1_UTCTIME) -> ::std::os::raw::c_int;
@@ -5097,8 +4877,7 @@ extern "C" {
     pub fn ASN1_OCTET_STRING_free(a: *mut ASN1_OCTET_STRING);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_OCTET_STRING_it"]
-    pub static mut ASN1_OCTET_STRING_it: ASN1_ITEM;
+    pub static ASN1_OCTET_STRING_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_OCTET_STRING_dup(a: *const ASN1_OCTET_STRING) -> *mut ASN1_OCTET_STRING;
@@ -5123,8 +4902,7 @@ extern "C" {
     pub fn ASN1_VISIBLESTRING_free(a: *mut ASN1_VISIBLESTRING);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_VISIBLESTRING_it"]
-    pub static mut ASN1_VISIBLESTRING_it: ASN1_ITEM;
+    pub static ASN1_VISIBLESTRING_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_UNIVERSALSTRING_new() -> *mut ASN1_UNIVERSALSTRING;
@@ -5133,8 +4911,7 @@ extern "C" {
     pub fn ASN1_UNIVERSALSTRING_free(a: *mut ASN1_UNIVERSALSTRING);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_UNIVERSALSTRING_it"]
-    pub static mut ASN1_UNIVERSALSTRING_it: ASN1_ITEM;
+    pub static ASN1_UNIVERSALSTRING_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_UTF8STRING_new() -> *mut ASN1_UTF8STRING;
@@ -5143,8 +4920,7 @@ extern "C" {
     pub fn ASN1_UTF8STRING_free(a: *mut ASN1_UTF8STRING);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_UTF8STRING_it"]
-    pub static mut ASN1_UTF8STRING_it: ASN1_ITEM;
+    pub static ASN1_UTF8STRING_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_NULL_new() -> *mut ASN1_NULL;
@@ -5153,8 +4929,7 @@ extern "C" {
     pub fn ASN1_NULL_free(a: *mut ASN1_NULL);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_NULL_it"]
-    pub static mut ASN1_NULL_it: ASN1_ITEM;
+    pub static ASN1_NULL_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_BMPSTRING_new() -> *mut ASN1_BMPSTRING;
@@ -5163,8 +4938,7 @@ extern "C" {
     pub fn ASN1_BMPSTRING_free(a: *mut ASN1_BMPSTRING);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_BMPSTRING_it"]
-    pub static mut ASN1_BMPSTRING_it: ASN1_ITEM;
+    pub static ASN1_BMPSTRING_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_PRINTABLE_new() -> *mut ASN1_STRING;
@@ -5173,8 +4947,7 @@ extern "C" {
     pub fn ASN1_PRINTABLE_free(a: *mut ASN1_STRING);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_PRINTABLE_it"]
-    pub static mut ASN1_PRINTABLE_it: ASN1_ITEM;
+    pub static ASN1_PRINTABLE_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_PRINTABLESTRING_new() -> *mut ASN1_PRINTABLESTRING;
@@ -5183,8 +4956,7 @@ extern "C" {
     pub fn ASN1_PRINTABLESTRING_free(a: *mut ASN1_PRINTABLESTRING);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_PRINTABLESTRING_it"]
-    pub static mut ASN1_PRINTABLESTRING_it: ASN1_ITEM;
+    pub static ASN1_PRINTABLESTRING_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_T61STRING_new() -> *mut ASN1_T61STRING;
@@ -5193,8 +4965,7 @@ extern "C" {
     pub fn ASN1_T61STRING_free(a: *mut ASN1_T61STRING);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_T61STRING_it"]
-    pub static mut ASN1_T61STRING_it: ASN1_ITEM;
+    pub static ASN1_T61STRING_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_IA5STRING_new() -> *mut ASN1_IA5STRING;
@@ -5203,8 +4974,7 @@ extern "C" {
     pub fn ASN1_IA5STRING_free(a: *mut ASN1_IA5STRING);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_IA5STRING_it"]
-    pub static mut ASN1_IA5STRING_it: ASN1_ITEM;
+    pub static ASN1_IA5STRING_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_GENERALSTRING_new() -> *mut ASN1_GENERALSTRING;
@@ -5213,8 +4983,7 @@ extern "C" {
     pub fn ASN1_GENERALSTRING_free(a: *mut ASN1_GENERALSTRING);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_GENERALSTRING_it"]
-    pub static mut ASN1_GENERALSTRING_it: ASN1_ITEM;
+    pub static ASN1_GENERALSTRING_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_UTCTIME_new() -> *mut ASN1_UTCTIME;
@@ -5223,8 +4992,7 @@ extern "C" {
     pub fn ASN1_UTCTIME_free(a: *mut ASN1_UTCTIME);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_UTCTIME_it"]
-    pub static mut ASN1_UTCTIME_it: ASN1_ITEM;
+    pub static ASN1_UTCTIME_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_GENERALIZEDTIME_new() -> *mut ASN1_GENERALIZEDTIME;
@@ -5233,8 +5001,7 @@ extern "C" {
     pub fn ASN1_GENERALIZEDTIME_free(a: *mut ASN1_GENERALIZEDTIME);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_GENERALIZEDTIME_it"]
-    pub static mut ASN1_GENERALIZEDTIME_it: ASN1_ITEM;
+    pub static ASN1_GENERALIZEDTIME_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_TIME_new() -> *mut ASN1_TIME;
@@ -5243,12 +5010,10 @@ extern "C" {
     pub fn ASN1_TIME_free(a: *mut ASN1_TIME);
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_TIME_it"]
-    pub static mut ASN1_TIME_it: ASN1_ITEM;
+    pub static ASN1_TIME_it: ASN1_ITEM;
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_OCTET_STRING_NDEF_it"]
-    pub static mut ASN1_OCTET_STRING_NDEF_it: ASN1_ITEM;
+    pub static ASN1_OCTET_STRING_NDEF_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_TIME_set(s: *mut ASN1_TIME, t: time_t) -> *mut ASN1_TIME;
@@ -6256,20 +6021,16 @@ fn bindgen_test_layout_ASN1_STREAM_ARG_st() {
 }
 pub type ASN1_STREAM_ARG = ASN1_STREAM_ARG_st;
 extern "C" {
-    #[link_name = "\u{1}ASN1_BOOLEAN_it"]
-    pub static mut ASN1_BOOLEAN_it: ASN1_ITEM;
+    pub static ASN1_BOOLEAN_it: ASN1_ITEM;
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_TBOOLEAN_it"]
-    pub static mut ASN1_TBOOLEAN_it: ASN1_ITEM;
+    pub static ASN1_TBOOLEAN_it: ASN1_ITEM;
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_FBOOLEAN_it"]
-    pub static mut ASN1_FBOOLEAN_it: ASN1_ITEM;
+    pub static ASN1_FBOOLEAN_it: ASN1_ITEM;
 }
 extern "C" {
-    #[link_name = "\u{1}ASN1_SEQUENCE_it"]
-    pub static mut ASN1_SEQUENCE_it: ASN1_ITEM;
+    pub static ASN1_SEQUENCE_it: ASN1_ITEM;
 }
 extern "C" {
     pub fn ASN1_item_ex_new(
@@ -6320,21 +6081,21 @@ extern "C" {
     pub fn ASN1_primitive_free(pval: *mut *mut ASN1_VALUE, it: *const ASN1_ITEM);
 }
 extern "C" {
-    pub fn EVP_EncodeBlock(dst: *mut u8, src: *const u8, src_len: usize) -> usize;
+    pub fn EVP_EncodeBlock(dst: *mut u8, src: *const u8, src_len: size_t) -> size_t;
 }
 extern "C" {
-    pub fn EVP_EncodedLength(out_len: *mut usize, len: usize) -> ::std::os::raw::c_int;
+    pub fn EVP_EncodedLength(out_len: *mut size_t, len: size_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn EVP_DecodedLength(out_len: *mut usize, len: usize) -> ::std::os::raw::c_int;
+    pub fn EVP_DecodedLength(out_len: *mut size_t, len: size_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn EVP_DecodeBase64(
         out: *mut u8,
-        out_len: *mut usize,
-        max_out: usize,
+        out_len: *mut size_t,
+        max_out: size_t,
         in_: *const u8,
-        in_len: usize,
+        in_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -6346,7 +6107,7 @@ extern "C" {
         out: *mut u8,
         out_len: *mut ::std::os::raw::c_int,
         in_: *const u8,
-        in_len: usize,
+        in_len: size_t,
     );
 }
 extern "C" {
@@ -6365,7 +6126,7 @@ extern "C" {
         out: *mut u8,
         out_len: *mut ::std::os::raw::c_int,
         in_: *const u8,
-        in_len: usize,
+        in_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -6376,7 +6137,7 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn EVP_DecodeBlock(dst: *mut u8, src: *const u8, src_len: usize) -> ::std::os::raw::c_int;
+    pub fn EVP_DecodeBlock(dst: *mut u8, src: *const u8, src_len: size_t) -> ::std::os::raw::c_int;
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -6430,7 +6191,7 @@ fn bindgen_test_layout_evp_encode_ctx_st() {
 #[derive(Debug, Copy, Clone)]
 pub struct cbs_st {
     pub data: *const u8,
-    pub len: usize,
+    pub len: size_t,
 }
 #[test]
 fn bindgen_test_layout_cbs_st() {
@@ -6452,22 +6213,22 @@ fn bindgen_test_layout_cbs_st() {
     );
 }
 extern "C" {
-    pub fn CBS_init(cbs: *mut CBS, data: *const u8, len: usize);
+    pub fn CBS_init(cbs: *mut CBS, data: *const u8, len: size_t);
 }
 extern "C" {
-    pub fn CBS_skip(cbs: *mut CBS, len: usize) -> ::std::os::raw::c_int;
+    pub fn CBS_skip(cbs: *mut CBS, len: size_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn CBS_data(cbs: *const CBS) -> *const u8;
 }
 extern "C" {
-    pub fn CBS_len(cbs: *const CBS) -> usize;
+    pub fn CBS_len(cbs: *const CBS) -> size_t;
 }
 extern "C" {
     pub fn CBS_stow(
         cbs: *const CBS,
         out_ptr: *mut *mut u8,
-        out_len: *mut usize,
+        out_len: *mut size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -6480,7 +6241,7 @@ extern "C" {
     pub fn CBS_contains_zero_byte(cbs: *const CBS) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn CBS_mem_equal(cbs: *const CBS, data: *const u8, len: usize) -> ::std::os::raw::c_int;
+    pub fn CBS_mem_equal(cbs: *const CBS, data: *const u8, len: size_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn CBS_get_u8(cbs: *mut CBS, out: *mut u8) -> ::std::os::raw::c_int;
@@ -6501,10 +6262,10 @@ extern "C" {
     pub fn CBS_get_last_u8(cbs: *mut CBS, out: *mut u8) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn CBS_get_bytes(cbs: *mut CBS, out: *mut CBS, len: usize) -> ::std::os::raw::c_int;
+    pub fn CBS_get_bytes(cbs: *mut CBS, out: *mut CBS, len: size_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn CBS_copy_bytes(cbs: *mut CBS, out: *mut u8, len: usize) -> ::std::os::raw::c_int;
+    pub fn CBS_copy_bytes(cbs: *mut CBS, out: *mut u8, len: size_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn CBS_get_u8_length_prefixed(cbs: *mut CBS, out: *mut CBS) -> ::std::os::raw::c_int;
@@ -6547,7 +6308,7 @@ extern "C" {
         cbs: *mut CBS,
         out: *mut CBS,
         out_tag: *mut ::std::os::raw::c_uint,
-        out_header_len: *mut usize,
+        out_header_len: *mut size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -6555,7 +6316,7 @@ extern "C" {
         cbs: *mut CBS,
         out: *mut CBS,
         out_tag: *mut ::std::os::raw::c_uint,
-        out_header_len: *mut usize,
+        out_header_len: *mut size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -6615,8 +6376,8 @@ extern "C" {
 #[derive(Debug, Copy, Clone)]
 pub struct cbb_buffer_st {
     pub buf: *mut u8,
-    pub len: usize,
-    pub cap: usize,
+    pub len: size_t,
+    pub cap: size_t,
     pub can_resize: ::std::os::raw::c_char,
     pub error: ::std::os::raw::c_char,
 }
@@ -6663,7 +6424,7 @@ fn bindgen_test_layout_cbb_buffer_st() {
 pub struct cbb_st {
     pub base: *mut cbb_buffer_st,
     pub child: *mut CBB,
-    pub offset: usize,
+    pub offset: size_t,
     pub pending_len_len: u8,
     pub pending_is_asn1: ::std::os::raw::c_char,
     pub is_top_level: ::std::os::raw::c_char,
@@ -6711,10 +6472,10 @@ extern "C" {
     pub fn CBB_zero(cbb: *mut CBB);
 }
 extern "C" {
-    pub fn CBB_init(cbb: *mut CBB, initial_capacity: usize) -> ::std::os::raw::c_int;
+    pub fn CBB_init(cbb: *mut CBB, initial_capacity: size_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn CBB_init_fixed(cbb: *mut CBB, buf: *mut u8, len: usize) -> ::std::os::raw::c_int;
+    pub fn CBB_init_fixed(cbb: *mut CBB, buf: *mut u8, len: size_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn CBB_cleanup(cbb: *mut CBB);
@@ -6723,7 +6484,7 @@ extern "C" {
     pub fn CBB_finish(
         cbb: *mut CBB,
         out_data: *mut *mut u8,
-        out_len: *mut usize,
+        out_len: *mut size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -6733,7 +6494,7 @@ extern "C" {
     pub fn CBB_data(cbb: *const CBB) -> *const u8;
 }
 extern "C" {
-    pub fn CBB_len(cbb: *const CBB) -> usize;
+    pub fn CBB_len(cbb: *const CBB) -> size_t;
 }
 extern "C" {
     pub fn CBB_add_u8_length_prefixed(
@@ -6761,20 +6522,21 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn CBB_add_bytes(cbb: *mut CBB, data: *const u8, len: usize) -> ::std::os::raw::c_int;
+    pub fn CBB_add_bytes(cbb: *mut CBB, data: *const u8, len: size_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn CBB_add_space(
         cbb: *mut CBB,
         out_data: *mut *mut u8,
-        len: usize,
+        len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn CBB_reserve(cbb: *mut CBB, out_data: *mut *mut u8, len: usize) -> ::std::os::raw::c_int;
+    pub fn CBB_reserve(cbb: *mut CBB, out_data: *mut *mut u8, len: size_t)
+        -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn CBB_did_write(cbb: *mut CBB, len: usize) -> ::std::os::raw::c_int;
+    pub fn CBB_did_write(cbb: *mut CBB, len: size_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn CBB_add_u8(cbb: *mut CBB, value: u8) -> ::std::os::raw::c_int;
@@ -6801,7 +6563,7 @@ extern "C" {
     pub fn CBB_add_asn1_octet_string(
         cbb: *mut CBB,
         data: *const u8,
-        data_len: usize,
+        data_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -6811,7 +6573,7 @@ extern "C" {
     pub fn CBB_add_asn1_oid_from_text(
         cbb: *mut CBB,
         text: *const ::std::os::raw::c_char,
-        len: usize,
+        len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -6848,7 +6610,7 @@ fn bindgen_test_layout_cast_key_st() {
 }
 pub type CAST_KEY = cast_key_st;
 extern "C" {
-    pub fn CAST_set_key(key: *mut CAST_KEY, len: usize, data: *const u8);
+    pub fn CAST_set_key(key: *mut CAST_KEY, len: size_t, data: *const u8);
 }
 extern "C" {
     pub fn CAST_ecb_encrypt(
@@ -6868,7 +6630,7 @@ extern "C" {
     pub fn CAST_cbc_encrypt(
         in_: *const u8,
         out: *mut u8,
-        length: usize,
+        length: size_t,
         ks: *const CAST_KEY,
         iv: *mut u8,
         enc: ::std::os::raw::c_int,
@@ -6878,7 +6640,7 @@ extern "C" {
     pub fn CAST_cfb64_encrypt(
         in_: *const u8,
         out: *mut u8,
-        length: usize,
+        length: size_t,
         schedule: *const CAST_KEY,
         ivec: *mut u8,
         num: *mut ::std::os::raw::c_int,
@@ -6889,7 +6651,7 @@ extern "C" {
     pub fn CRYPTO_chacha_20(
         out: *mut u8,
         in_: *const u8,
-        in_len: usize,
+        in_len: size_t,
         key: *const u8,
         nonce: *const u8,
         counter: u32,
@@ -7041,7 +6803,7 @@ extern "C" {
         ctx: *mut EVP_CIPHER_CTX,
         out: *mut u8,
         in_: *const u8,
-        in_len: usize,
+        in_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -7134,7 +6896,7 @@ extern "C" {
         md: *const EVP_MD,
         salt: *const u8,
         data: *const u8,
-        data_len: usize,
+        data_len: size_t,
         count: ::std::os::raw::c_uint,
         key: *mut u8,
         iv: *mut u8,
@@ -7373,7 +7135,7 @@ pub struct evp_cipher_st {
             ctx: *mut EVP_CIPHER_CTX,
             out: *mut u8,
             in_: *const u8,
-            inl: usize,
+            inl: size_t,
         ) -> ::std::os::raw::c_int,
     >,
     pub cleanup: ::std::option::Option<unsafe extern "C" fn(arg1: *mut EVP_CIPHER_CTX)>,
@@ -7466,11 +7228,10 @@ extern "C" {
     pub fn OPENSSL_no_config();
 }
 extern "C" {
-    #[link_name = "\u{1}OPENSSL_ia32cap_P"]
     pub static mut OPENSSL_ia32cap_P: [u32; 4usize];
 }
 extern "C" {
-    pub fn OPENSSL_malloc(size: usize) -> *mut ::std::os::raw::c_void;
+    pub fn OPENSSL_malloc(size: size_t) -> *mut ::std::os::raw::c_void;
 }
 extern "C" {
     pub fn OPENSSL_free(ptr: *mut ::std::os::raw::c_void);
@@ -7478,27 +7239,27 @@ extern "C" {
 extern "C" {
     pub fn OPENSSL_realloc(
         ptr: *mut ::std::os::raw::c_void,
-        new_size: usize,
+        new_size: size_t,
     ) -> *mut ::std::os::raw::c_void;
 }
 extern "C" {
-    pub fn OPENSSL_cleanse(ptr: *mut ::std::os::raw::c_void, len: usize);
+    pub fn OPENSSL_cleanse(ptr: *mut ::std::os::raw::c_void, len: size_t);
 }
 extern "C" {
     pub fn CRYPTO_memcmp(
         a: *const ::std::os::raw::c_void,
         b: *const ::std::os::raw::c_void,
-        len: usize,
+        len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn OPENSSL_hash32(ptr: *const ::std::os::raw::c_void, len: usize) -> u32;
+    pub fn OPENSSL_hash32(ptr: *const ::std::os::raw::c_void, len: size_t) -> u32;
 }
 extern "C" {
     pub fn OPENSSL_strdup(s: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_char;
 }
 extern "C" {
-    pub fn OPENSSL_strnlen(s: *const ::std::os::raw::c_char, len: usize) -> usize;
+    pub fn OPENSSL_strnlen(s: *const ::std::os::raw::c_char, len: size_t) -> size_t;
 }
 extern "C" {
     pub fn OPENSSL_tolower(c: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
@@ -7513,13 +7274,13 @@ extern "C" {
     pub fn OPENSSL_strncasecmp(
         a: *const ::std::os::raw::c_char,
         b: *const ::std::os::raw::c_char,
-        n: usize,
+        n: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn BIO_snprintf(
         buf: *mut ::std::os::raw::c_char,
-        n: usize,
+        n: size_t,
         format: *const ::std::os::raw::c_char,
         ...
     ) -> ::std::os::raw::c_int;
@@ -7527,13 +7288,13 @@ extern "C" {
 extern "C" {
     pub fn BIO_vsnprintf(
         buf: *mut ::std::os::raw::c_char,
-        n: usize,
+        n: size_t,
         format: *const ::std::os::raw::c_char,
         args: *mut __va_list_tag,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn OPENSSL_clear_free(ptr: *mut ::std::os::raw::c_void, len: usize);
+    pub fn OPENSSL_clear_free(ptr: *mut ::std::os::raw::c_void, len: size_t);
 }
 extern "C" {
     pub fn CRYPTO_library_init();
@@ -7575,14 +7336,14 @@ extern "C" {
     pub fn ED25519_sign(
         out_sig: *mut u8,
         message: *const u8,
-        message_len: usize,
+        message_len: size_t,
         private_key: *const u8,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn ED25519_verify(
         message: *const u8,
-        message_len: usize,
+        message_len: size_t,
         signature: *const u8,
         public_key: *const u8,
     ) -> ::std::os::raw::c_int;
@@ -7656,7 +7417,7 @@ extern "C" {
     pub fn DES_ncbc_encrypt(
         in_: *const u8,
         out: *mut u8,
-        len: usize,
+        len: size_t,
         schedule: *const DES_key_schedule,
         ivec: *mut DES_cblock,
         enc: ::std::os::raw::c_int,
@@ -7676,7 +7437,7 @@ extern "C" {
     pub fn DES_ede3_cbc_encrypt(
         in_: *const u8,
         out: *mut u8,
-        len: usize,
+        len: size_t,
         ks1: *const DES_key_schedule,
         ks2: *const DES_key_schedule,
         ks3: *const DES_key_schedule,
@@ -7688,7 +7449,7 @@ extern "C" {
     pub fn DES_ede2_cbc_encrypt(
         in_: *const u8,
         out: *mut u8,
-        len: usize,
+        len: size_t,
         ks1: *const DES_key_schedule,
         ks2: *const DES_key_schedule,
         ivec: *mut DES_cblock,
@@ -8023,7 +7784,7 @@ extern "C" {
     pub fn EVP_DigestUpdate(
         ctx: *mut EVP_MD_CTX,
         data: *const ::std::os::raw::c_void,
-        len: usize,
+        len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -8043,7 +7804,7 @@ extern "C" {
 extern "C" {
     pub fn EVP_Digest(
         data: *const ::std::os::raw::c_void,
-        len: usize,
+        len: size_t,
         md_out: *mut u8,
         md_out_size: *mut ::std::os::raw::c_uint,
         type_: *const EVP_MD,
@@ -8057,19 +7818,19 @@ extern "C" {
     pub fn EVP_MD_flags(md: *const EVP_MD) -> u32;
 }
 extern "C" {
-    pub fn EVP_MD_size(md: *const EVP_MD) -> usize;
+    pub fn EVP_MD_size(md: *const EVP_MD) -> size_t;
 }
 extern "C" {
-    pub fn EVP_MD_block_size(md: *const EVP_MD) -> usize;
+    pub fn EVP_MD_block_size(md: *const EVP_MD) -> size_t;
 }
 extern "C" {
     pub fn EVP_MD_CTX_md(ctx: *const EVP_MD_CTX) -> *const EVP_MD;
 }
 extern "C" {
-    pub fn EVP_MD_CTX_size(ctx: *const EVP_MD_CTX) -> usize;
+    pub fn EVP_MD_CTX_size(ctx: *const EVP_MD_CTX) -> size_t;
 }
 extern "C" {
-    pub fn EVP_MD_CTX_block_size(ctx: *const EVP_MD_CTX) -> usize;
+    pub fn EVP_MD_CTX_block_size(ctx: *const EVP_MD_CTX) -> size_t;
 }
 extern "C" {
     pub fn EVP_MD_CTX_type(ctx: *const EVP_MD_CTX) -> ::std::os::raw::c_int;
@@ -8231,7 +7992,7 @@ extern "C" {
         dsa: *mut DSA,
         bits: ::std::os::raw::c_uint,
         seed: *const u8,
-        seed_len: usize,
+        seed_len: size_t,
         out_counter: *mut ::std::os::raw::c_int,
         out_h: *mut ::std::os::raw::c_ulong,
         cb: *mut BN_GENCB,
@@ -8276,12 +8037,12 @@ extern "C" {
     pub fn DSA_SIG_free(sig: *mut DSA_SIG);
 }
 extern "C" {
-    pub fn DSA_do_sign(digest: *const u8, digest_len: usize, dsa: *const DSA) -> *mut DSA_SIG;
+    pub fn DSA_do_sign(digest: *const u8, digest_len: size_t, dsa: *const DSA) -> *mut DSA_SIG;
 }
 extern "C" {
     pub fn DSA_do_verify(
         digest: *const u8,
-        digest_len: usize,
+        digest_len: size_t,
         sig: *mut DSA_SIG,
         dsa: *const DSA,
     ) -> ::std::os::raw::c_int;
@@ -8290,7 +8051,7 @@ extern "C" {
     pub fn DSA_do_check_signature(
         out_valid: *mut ::std::os::raw::c_int,
         digest: *const u8,
-        digest_len: usize,
+        digest_len: size_t,
         sig: *mut DSA_SIG,
         dsa: *const DSA,
     ) -> ::std::os::raw::c_int;
@@ -8299,7 +8060,7 @@ extern "C" {
     pub fn DSA_sign(
         type_: ::std::os::raw::c_int,
         digest: *const u8,
-        digest_len: usize,
+        digest_len: size_t,
         out_sig: *mut u8,
         out_siglen: *mut ::std::os::raw::c_uint,
         dsa: *const DSA,
@@ -8309,9 +8070,9 @@ extern "C" {
     pub fn DSA_verify(
         type_: ::std::os::raw::c_int,
         digest: *const u8,
-        digest_len: usize,
+        digest_len: size_t,
         sig: *const u8,
-        sig_len: usize,
+        sig_len: size_t,
         dsa: *const DSA,
     ) -> ::std::os::raw::c_int;
 }
@@ -8319,9 +8080,9 @@ extern "C" {
     pub fn DSA_check_signature(
         out_valid: *mut ::std::os::raw::c_int,
         digest: *const u8,
-        digest_len: usize,
+        digest_len: size_t,
         sig: *const u8,
-        sig_len: usize,
+        sig_len: size_t,
         dsa: *const DSA,
     ) -> ::std::os::raw::c_int;
 }
@@ -8599,9 +8360,9 @@ extern "C" {
         point: *const EC_POINT,
         form: point_conversion_form_t,
         buf: *mut u8,
-        len: usize,
+        len: size_t,
         ctx: *mut BN_CTX,
-    ) -> usize;
+    ) -> size_t;
 }
 extern "C" {
     pub fn EC_POINT_point2cbb(
@@ -8617,7 +8378,7 @@ extern "C" {
         group: *const EC_GROUP,
         point: *mut EC_POINT,
         buf: *const u8,
-        len: usize,
+        len: size_t,
         ctx: *mut BN_CTX,
     ) -> ::std::os::raw::c_int;
 }
@@ -8735,8 +8496,10 @@ fn bindgen_test_layout_EC_builtin_curve() {
     );
 }
 extern "C" {
-    pub fn EC_get_builtin_curves(out_curves: *mut EC_builtin_curve, max_num_curves: usize)
-        -> usize;
+    pub fn EC_get_builtin_curves(
+        out_curves: *mut EC_builtin_curve,
+        max_num_curves: size_t,
+    ) -> size_t;
 }
 extern "C" {
     pub fn EC_POINT_clear_free(point: *mut EC_POINT);
@@ -8811,7 +8574,7 @@ extern "C" {
         form: point_conversion_form_t,
         out_buf: *mut *mut ::std::os::raw::c_uchar,
         ctx: *mut BN_CTX,
-    ) -> usize;
+    ) -> size_t;
 }
 extern "C" {
     pub fn EC_KEY_generate_key(key: *mut EC_KEY) -> ::std::os::raw::c_int;
@@ -8872,11 +8635,11 @@ pub struct ecdsa_method_st {
         ::std::option::Option<unsafe extern "C" fn(key: *mut EC_KEY) -> ::std::os::raw::c_int>,
     pub finish:
         ::std::option::Option<unsafe extern "C" fn(key: *mut EC_KEY) -> ::std::os::raw::c_int>,
-    pub group_order_size: ::std::option::Option<unsafe extern "C" fn(key: *const EC_KEY) -> usize>,
+    pub group_order_size: ::std::option::Option<unsafe extern "C" fn(key: *const EC_KEY) -> size_t>,
     pub sign: ::std::option::Option<
         unsafe extern "C" fn(
             digest: *const u8,
-            digest_len: usize,
+            digest_len: size_t,
             sig: *mut u8,
             sig_len: *mut ::std::os::raw::c_uint,
             eckey: *mut EC_KEY,
@@ -8945,15 +8708,15 @@ extern "C" {
 extern "C" {
     pub fn ECDH_compute_key(
         out: *mut ::std::os::raw::c_void,
-        outlen: usize,
+        outlen: size_t,
         pub_key: *const EC_POINT,
         priv_key: *const EC_KEY,
         kdf: ::std::option::Option<
             unsafe extern "C" fn(
                 in_: *const ::std::os::raw::c_void,
-                inlen: usize,
+                inlen: size_t,
                 out: *mut ::std::os::raw::c_void,
-                outlen: *mut usize,
+                outlen: *mut size_t,
             ) -> *mut ::std::os::raw::c_void,
         >,
     ) -> ::std::os::raw::c_int;
@@ -8961,7 +8724,7 @@ extern "C" {
 extern "C" {
     pub fn ECDH_compute_key_fips(
         out: *mut u8,
-        out_len: usize,
+        out_len: size_t,
         pub_key: *const EC_POINT,
         priv_key: *const EC_KEY,
     ) -> ::std::os::raw::c_int;
@@ -8970,7 +8733,7 @@ extern "C" {
     pub fn ECDSA_sign(
         type_: ::std::os::raw::c_int,
         digest: *const u8,
-        digest_len: usize,
+        digest_len: size_t,
         sig: *mut u8,
         sig_len: *mut ::std::os::raw::c_uint,
         key: *const EC_KEY,
@@ -8980,14 +8743,14 @@ extern "C" {
     pub fn ECDSA_verify(
         type_: ::std::os::raw::c_int,
         digest: *const u8,
-        digest_len: usize,
+        digest_len: size_t,
         sig: *const u8,
-        sig_len: usize,
+        sig_len: size_t,
         key: *const EC_KEY,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn ECDSA_size(key: *const EC_KEY) -> usize;
+    pub fn ECDSA_size(key: *const EC_KEY) -> size_t;
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -9041,14 +8804,14 @@ extern "C" {
 extern "C" {
     pub fn ECDSA_do_sign(
         digest: *const u8,
-        digest_len: usize,
+        digest_len: size_t,
         key: *const EC_KEY,
     ) -> *mut ECDSA_SIG;
 }
 extern "C" {
     pub fn ECDSA_do_verify(
         digest: *const u8,
-        digest_len: usize,
+        digest_len: size_t,
         sig: *const ECDSA_SIG,
         key: *const EC_KEY,
     ) -> ::std::os::raw::c_int;
@@ -9057,7 +8820,7 @@ extern "C" {
     pub fn ECDSA_SIG_parse(cbs: *mut CBS) -> *mut ECDSA_SIG;
 }
 extern "C" {
-    pub fn ECDSA_SIG_from_bytes(in_: *const u8, in_len: usize) -> *mut ECDSA_SIG;
+    pub fn ECDSA_SIG_from_bytes(in_: *const u8, in_len: size_t) -> *mut ECDSA_SIG;
 }
 extern "C" {
     pub fn ECDSA_SIG_marshal(cbb: *mut CBB, sig: *const ECDSA_SIG) -> ::std::os::raw::c_int;
@@ -9065,12 +8828,12 @@ extern "C" {
 extern "C" {
     pub fn ECDSA_SIG_to_bytes(
         out_bytes: *mut *mut u8,
-        out_len: *mut usize,
+        out_len: *mut size_t,
         sig: *const ECDSA_SIG,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn ECDSA_SIG_max_len(order_len: usize) -> usize;
+    pub fn ECDSA_SIG_max_len(order_len: size_t) -> size_t;
 }
 extern "C" {
     pub fn EVP_PKEY_new() -> *mut EVP_PKEY;
@@ -9192,23 +8955,23 @@ extern "C" {
     pub fn EVP_DigestSignUpdate(
         ctx: *mut EVP_MD_CTX,
         data: *const ::std::os::raw::c_void,
-        len: usize,
+        len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn EVP_DigestSignFinal(
         ctx: *mut EVP_MD_CTX,
         out_sig: *mut u8,
-        out_sig_len: *mut usize,
+        out_sig_len: *mut size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn EVP_DigestSign(
         ctx: *mut EVP_MD_CTX,
         out_sig: *mut u8,
-        out_sig_len: *mut usize,
+        out_sig_len: *mut size_t,
         data: *const u8,
-        data_len: usize,
+        data_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -9224,23 +8987,23 @@ extern "C" {
     pub fn EVP_DigestVerifyUpdate(
         ctx: *mut EVP_MD_CTX,
         data: *const ::std::os::raw::c_void,
-        len: usize,
+        len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn EVP_DigestVerifyFinal(
         ctx: *mut EVP_MD_CTX,
         sig: *const u8,
-        sig_len: usize,
+        sig_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn EVP_DigestVerify(
         ctx: *mut EVP_MD_CTX,
         sig: *const u8,
-        sig_len: usize,
+        sig_len: size_t,
         data: *const u8,
-        len: usize,
+        len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -9257,7 +9020,7 @@ extern "C" {
     pub fn EVP_SignUpdate(
         ctx: *mut EVP_MD_CTX,
         data: *const ::std::os::raw::c_void,
-        len: usize,
+        len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -9282,14 +9045,14 @@ extern "C" {
     pub fn EVP_VerifyUpdate(
         ctx: *mut EVP_MD_CTX,
         data: *const ::std::os::raw::c_void,
-        len: usize,
+        len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn EVP_VerifyFinal(
         ctx: *mut EVP_MD_CTX,
         sig: *const u8,
-        sig_len: usize,
+        sig_len: size_t,
         pkey: *mut EVP_PKEY,
     ) -> ::std::os::raw::c_int;
 }
@@ -9320,38 +9083,38 @@ extern "C" {
 extern "C" {
     pub fn PKCS5_PBKDF2_HMAC(
         password: *const ::std::os::raw::c_char,
-        password_len: usize,
+        password_len: size_t,
         salt: *const u8,
-        salt_len: usize,
+        salt_len: size_t,
         iterations: ::std::os::raw::c_uint,
         digest: *const EVP_MD,
-        key_len: usize,
+        key_len: size_t,
         out_key: *mut u8,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn PKCS5_PBKDF2_HMAC_SHA1(
         password: *const ::std::os::raw::c_char,
-        password_len: usize,
+        password_len: size_t,
         salt: *const u8,
-        salt_len: usize,
+        salt_len: size_t,
         iterations: ::std::os::raw::c_uint,
-        key_len: usize,
+        key_len: size_t,
         out_key: *mut u8,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn EVP_PBE_scrypt(
         password: *const ::std::os::raw::c_char,
-        password_len: usize,
+        password_len: size_t,
         salt: *const u8,
-        salt_len: usize,
+        salt_len: size_t,
         N: u64,
         r: u64,
         p: u64,
-        max_mem: usize,
+        max_mem: size_t,
         out_key: *mut u8,
-        key_len: usize,
+        key_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -9376,9 +9139,9 @@ extern "C" {
     pub fn EVP_PKEY_sign(
         ctx: *mut EVP_PKEY_CTX,
         sig: *mut u8,
-        sig_len: *mut usize,
+        sig_len: *mut size_t,
         digest: *const u8,
-        digest_len: usize,
+        digest_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -9388,9 +9151,9 @@ extern "C" {
     pub fn EVP_PKEY_verify(
         ctx: *mut EVP_PKEY_CTX,
         sig: *const u8,
-        sig_len: usize,
+        sig_len: size_t,
         digest: *const u8,
-        digest_len: usize,
+        digest_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -9400,9 +9163,9 @@ extern "C" {
     pub fn EVP_PKEY_encrypt(
         ctx: *mut EVP_PKEY_CTX,
         out: *mut u8,
-        out_len: *mut usize,
+        out_len: *mut size_t,
         in_: *const u8,
-        in_len: usize,
+        in_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -9412,9 +9175,9 @@ extern "C" {
     pub fn EVP_PKEY_decrypt(
         ctx: *mut EVP_PKEY_CTX,
         out: *mut u8,
-        out_len: *mut usize,
+        out_len: *mut size_t,
         in_: *const u8,
-        in_len: usize,
+        in_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -9424,9 +9187,9 @@ extern "C" {
     pub fn EVP_PKEY_verify_recover(
         ctx: *mut EVP_PKEY_CTX,
         out: *mut u8,
-        out_len: *mut usize,
+        out_len: *mut size_t,
         sig: *const u8,
-        siglen: usize,
+        siglen: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -9442,7 +9205,7 @@ extern "C" {
     pub fn EVP_PKEY_derive(
         ctx: *mut EVP_PKEY_CTX,
         key: *mut u8,
-        out_key_len: *mut usize,
+        out_key_len: *mut size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -9539,7 +9302,7 @@ extern "C" {
     pub fn EVP_PKEY_CTX_set0_rsa_oaep_label(
         ctx: *mut EVP_PKEY_CTX,
         label: *mut u8,
-        label_len: usize,
+        label_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -9703,7 +9466,7 @@ extern "C" {
     pub fn HMAC_Init_ex(
         ctx: *mut HMAC_CTX,
         key: *const ::std::os::raw::c_void,
-        key_len: usize,
+        key_len: size_t,
         md: *const EVP_MD,
         impl_: *mut ENGINE,
     ) -> ::std::os::raw::c_int;
@@ -9712,7 +9475,7 @@ extern "C" {
     pub fn HMAC_Update(
         ctx: *mut HMAC_CTX,
         data: *const u8,
-        data_len: usize,
+        data_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -9723,7 +9486,7 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn HMAC_size(ctx: *const HMAC_CTX) -> usize;
+    pub fn HMAC_size(ctx: *const HMAC_CTX) -> size_t;
 }
 extern "C" {
     pub fn HMAC_CTX_copy_ex(dest: *mut HMAC_CTX, src: *const HMAC_CTX) -> ::std::os::raw::c_int;
@@ -9792,12 +9555,12 @@ extern "C" {
 extern "C" {
     pub fn CRYPTO_BUFFER_new(
         data: *const u8,
-        len: usize,
+        len: size_t,
         pool: *mut CRYPTO_BUFFER_POOL,
     ) -> *mut CRYPTO_BUFFER;
 }
 extern "C" {
-    pub fn CRYPTO_BUFFER_alloc(out_data: *mut *mut u8, len: usize) -> *mut CRYPTO_BUFFER;
+    pub fn CRYPTO_BUFFER_alloc(out_data: *mut *mut u8, len: size_t) -> *mut CRYPTO_BUFFER;
 }
 extern "C" {
     pub fn CRYPTO_BUFFER_new_from_CBS(
@@ -9815,7 +9578,7 @@ extern "C" {
     pub fn CRYPTO_BUFFER_data(buf: *const CRYPTO_BUFFER) -> *const u8;
 }
 extern "C" {
-    pub fn CRYPTO_BUFFER_len(buf: *const CRYPTO_BUFFER) -> usize;
+    pub fn CRYPTO_BUFFER_len(buf: *const CRYPTO_BUFFER) -> size_t;
 }
 extern "C" {
     pub fn CRYPTO_BUFFER_init_CBS(buf: *const CRYPTO_BUFFER, out: *mut CBS);
@@ -9892,28 +9655,28 @@ extern "C" {
 extern "C" {
     pub fn RSA_encrypt(
         rsa: *mut RSA,
-        out_len: *mut usize,
+        out_len: *mut size_t,
         out: *mut u8,
-        max_out: usize,
+        max_out: size_t,
         in_: *const u8,
-        in_len: usize,
+        in_len: size_t,
         padding: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn RSA_decrypt(
         rsa: *mut RSA,
-        out_len: *mut usize,
+        out_len: *mut size_t,
         out: *mut u8,
-        max_out: usize,
+        max_out: size_t,
         in_: *const u8,
-        in_len: usize,
+        in_len: size_t,
         padding: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn RSA_public_encrypt(
-        flen: usize,
+        flen: size_t,
         from: *const u8,
         to: *mut u8,
         rsa: *mut RSA,
@@ -9922,7 +9685,7 @@ extern "C" {
 }
 extern "C" {
     pub fn RSA_private_decrypt(
-        flen: usize,
+        flen: size_t,
         from: *const u8,
         to: *mut u8,
         rsa: *mut RSA,
@@ -9942,11 +9705,11 @@ extern "C" {
 extern "C" {
     pub fn RSA_sign_pss_mgf1(
         rsa: *mut RSA,
-        out_len: *mut usize,
+        out_len: *mut size_t,
         out: *mut u8,
-        max_out: usize,
+        max_out: size_t,
         in_: *const u8,
-        in_len: usize,
+        in_len: size_t,
         md: *const EVP_MD,
         mgf1_md: *const EVP_MD,
         salt_len: ::std::os::raw::c_int,
@@ -9955,11 +9718,11 @@ extern "C" {
 extern "C" {
     pub fn RSA_sign_raw(
         rsa: *mut RSA,
-        out_len: *mut usize,
+        out_len: *mut size_t,
         out: *mut u8,
-        max_out: usize,
+        max_out: size_t,
         in_: *const u8,
-        in_len: usize,
+        in_len: size_t,
         padding: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
 }
@@ -9967,9 +9730,9 @@ extern "C" {
     pub fn RSA_verify(
         hash_nid: ::std::os::raw::c_int,
         msg: *const u8,
-        msg_len: usize,
+        msg_len: size_t,
         sig: *const u8,
-        sig_len: usize,
+        sig_len: size_t,
         rsa: *mut RSA,
     ) -> ::std::os::raw::c_int;
 }
@@ -9977,28 +9740,28 @@ extern "C" {
     pub fn RSA_verify_pss_mgf1(
         rsa: *mut RSA,
         msg: *const u8,
-        msg_len: usize,
+        msg_len: size_t,
         md: *const EVP_MD,
         mgf1_md: *const EVP_MD,
         salt_len: ::std::os::raw::c_int,
         sig: *const u8,
-        sig_len: usize,
+        sig_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn RSA_verify_raw(
         rsa: *mut RSA,
-        out_len: *mut usize,
+        out_len: *mut size_t,
         out: *mut u8,
-        max_out: usize,
+        max_out: size_t,
         in_: *const u8,
-        in_len: usize,
+        in_len: size_t,
         padding: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn RSA_private_encrypt(
-        flen: usize,
+        flen: size_t,
         from: *const u8,
         to: *mut u8,
         rsa: *mut RSA,
@@ -10007,7 +9770,7 @@ extern "C" {
 }
 extern "C" {
     pub fn RSA_public_decrypt(
-        flen: usize,
+        flen: size_t,
         from: *const u8,
         to: *mut u8,
         rsa: *mut RSA,
@@ -10049,11 +9812,11 @@ extern "C" {
 extern "C" {
     pub fn RSA_padding_add_PKCS1_OAEP_mgf1(
         to: *mut u8,
-        to_len: usize,
+        to_len: size_t,
         from: *const u8,
-        from_len: usize,
+        from_len: size_t,
         param: *const u8,
-        param_len: usize,
+        param_len: size_t,
         md: *const EVP_MD,
         mgf1md: *const EVP_MD,
     ) -> ::std::os::raw::c_int;
@@ -10061,18 +9824,18 @@ extern "C" {
 extern "C" {
     pub fn RSA_add_pkcs1_prefix(
         out_msg: *mut *mut u8,
-        out_msg_len: *mut usize,
+        out_msg_len: *mut size_t,
         is_alloced: *mut ::std::os::raw::c_int,
         hash_nid: ::std::os::raw::c_int,
         msg: *const u8,
-        msg_len: usize,
+        msg_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn RSA_parse_public_key(cbs: *mut CBS) -> *mut RSA;
 }
 extern "C" {
-    pub fn RSA_public_key_from_bytes(in_: *const u8, in_len: usize) -> *mut RSA;
+    pub fn RSA_public_key_from_bytes(in_: *const u8, in_len: size_t) -> *mut RSA;
 }
 extern "C" {
     pub fn RSA_marshal_public_key(cbb: *mut CBB, rsa: *const RSA) -> ::std::os::raw::c_int;
@@ -10080,7 +9843,7 @@ extern "C" {
 extern "C" {
     pub fn RSA_public_key_to_bytes(
         out_bytes: *mut *mut u8,
-        out_len: *mut usize,
+        out_len: *mut size_t,
         rsa: *const RSA,
     ) -> ::std::os::raw::c_int;
 }
@@ -10088,7 +9851,7 @@ extern "C" {
     pub fn RSA_parse_private_key(cbs: *mut CBS) -> *mut RSA;
 }
 extern "C" {
-    pub fn RSA_private_key_from_bytes(in_: *const u8, in_len: usize) -> *mut RSA;
+    pub fn RSA_private_key_from_bytes(in_: *const u8, in_len: size_t) -> *mut RSA;
 }
 extern "C" {
     pub fn RSA_marshal_private_key(cbb: *mut CBB, rsa: *const RSA) -> ::std::os::raw::c_int;
@@ -10096,7 +9859,7 @@ extern "C" {
 extern "C" {
     pub fn RSA_private_key_to_bytes(
         out_bytes: *mut *mut u8,
-        out_len: *mut usize,
+        out_len: *mut size_t,
         rsa: *const RSA,
     ) -> ::std::os::raw::c_int;
 }
@@ -10157,11 +9920,11 @@ extern "C" {
 extern "C" {
     pub fn RSA_padding_add_PKCS1_OAEP(
         to: *mut u8,
-        to_len: usize,
+        to_len: size_t,
         from: *const u8,
-        from_len: usize,
+        from_len: size_t,
         param: *const u8,
-        param_len: usize,
+        param_len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -10178,7 +9941,7 @@ pub struct rsa_meth_st {
     pub app_data: *mut ::std::os::raw::c_void,
     pub init: ::std::option::Option<unsafe extern "C" fn(rsa: *mut RSA) -> ::std::os::raw::c_int>,
     pub finish: ::std::option::Option<unsafe extern "C" fn(rsa: *mut RSA) -> ::std::os::raw::c_int>,
-    pub size: ::std::option::Option<unsafe extern "C" fn(rsa: *const RSA) -> usize>,
+    pub size: ::std::option::Option<unsafe extern "C" fn(rsa: *const RSA) -> size_t>,
     pub sign: ::std::option::Option<
         unsafe extern "C" fn(
             type_: ::std::os::raw::c_int,
@@ -10192,22 +9955,22 @@ pub struct rsa_meth_st {
     pub sign_raw: ::std::option::Option<
         unsafe extern "C" fn(
             rsa: *mut RSA,
-            out_len: *mut usize,
+            out_len: *mut size_t,
             out: *mut u8,
-            max_out: usize,
+            max_out: size_t,
             in_: *const u8,
-            in_len: usize,
+            in_len: size_t,
             padding: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub decrypt: ::std::option::Option<
         unsafe extern "C" fn(
             rsa: *mut RSA,
-            out_len: *mut usize,
+            out_len: *mut size_t,
             out: *mut u8,
-            max_out: usize,
+            max_out: size_t,
             in_: *const u8,
-            in_len: usize,
+            in_len: size_t,
             padding: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
@@ -10216,7 +9979,7 @@ pub struct rsa_meth_st {
             rsa: *mut RSA,
             out: *mut u8,
             in_: *const u8,
-            len: usize,
+            len: size_t,
         ) -> ::std::os::raw::c_int,
     >,
     pub flags: ::std::os::raw::c_int,
@@ -10480,7 +10243,7 @@ extern "C" {
     pub fn SHA1_Update(
         sha: *mut SHA_CTX,
         data: *const ::std::os::raw::c_void,
-        len: usize,
+        len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -10650,7 +10413,7 @@ extern "C" {
     pub fn SHA224_Update(
         sha: *mut SHA256_CTX,
         data: *const ::std::os::raw::c_void,
-        len: usize,
+        len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -10663,7 +10426,7 @@ extern "C" {
     pub fn SHA256_Update(
         sha: *mut SHA256_CTX,
         data: *const ::std::os::raw::c_void,
-        len: usize,
+        len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -10673,7 +10436,7 @@ extern "C" {
     pub fn SHA256_Transform(sha: *mut SHA256_CTX, block: *const u8);
 }
 extern "C" {
-    pub fn SHA256_TransformBlocks(state: *mut u32, data: *const u8, num_blocks: usize);
+    pub fn SHA256_TransformBlocks(state: *mut u32, data: *const u8, num_blocks: size_t);
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -10735,7 +10498,7 @@ extern "C" {
     pub fn SHA384_Update(
         sha: *mut SHA512_CTX,
         data: *const ::std::os::raw::c_void,
-        len: usize,
+        len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -10748,7 +10511,7 @@ extern "C" {
     pub fn SHA512_Update(
         sha: *mut SHA512_CTX,
         data: *const ::std::os::raw::c_void,
-        len: usize,
+        len: size_t,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -11675,21 +11438,20 @@ extern "C" {
     pub fn RSA_PSS_PARAMS_free(a: *mut RSA_PSS_PARAMS);
 }
 extern "C" {
-    #[link_name = "\u{1}RSA_PSS_PARAMS_it"]
-    pub static mut RSA_PSS_PARAMS_it: ASN1_ITEM;
+    pub static RSA_PSS_PARAMS_it: ASN1_ITEM;
 }
 pub type poly1305_state = [u8; 512usize];
 extern "C" {
     pub fn CRYPTO_poly1305_init(state: *mut poly1305_state, key: *const u8);
 }
 extern "C" {
-    pub fn CRYPTO_poly1305_update(state: *mut poly1305_state, in_: *const u8, in_len: usize);
+    pub fn CRYPTO_poly1305_update(state: *mut poly1305_state, in_: *const u8, in_len: size_t);
 }
 extern "C" {
     pub fn CRYPTO_poly1305_finish(state: *mut poly1305_state, mac: *mut u8);
 }
 extern "C" {
-    pub fn RAND_bytes(buf: *mut u8, len: usize) -> ::std::os::raw::c_int;
+    pub fn RAND_bytes(buf: *mut u8, len: size_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn RAND_cleanup();
@@ -11701,7 +11463,7 @@ extern "C" {
     pub fn RAND_enable_fork_unsafe_buffering(fd: ::std::os::raw::c_int);
 }
 extern "C" {
-    pub fn RAND_pseudo_bytes(buf: *mut u8, len: usize) -> ::std::os::raw::c_int;
+    pub fn RAND_pseudo_bytes(buf: *mut u8, len: size_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn RAND_seed(buf: *const ::std::os::raw::c_void, num: ::std::os::raw::c_int);
@@ -11715,7 +11477,7 @@ extern "C" {
 extern "C" {
     pub fn RAND_file_name(
         buf: *mut ::std::os::raw::c_char,
-        num: usize,
+        num: size_t,
     ) -> *const ::std::os::raw::c_char;
 }
 extern "C" {
@@ -11737,7 +11499,7 @@ pub struct rand_meth_st {
         unsafe extern "C" fn(buf: *const ::std::os::raw::c_void, num: ::std::os::raw::c_int),
     >,
     pub bytes: ::std::option::Option<
-        unsafe extern "C" fn(buf: *mut u8, num: usize) -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(buf: *mut u8, num: size_t) -> ::std::os::raw::c_int,
     >,
     pub cleanup: ::std::option::Option<unsafe extern "C" fn()>,
     pub add: ::std::option::Option<
@@ -11748,7 +11510,7 @@ pub struct rand_meth_st {
         ),
     >,
     pub pseudorand: ::std::option::Option<
-        unsafe extern "C" fn(buf: *mut u8, num: usize) -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(buf: *mut u8, num: size_t) -> ::std::os::raw::c_int,
     >,
     pub status: ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
 }
